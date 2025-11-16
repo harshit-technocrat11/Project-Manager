@@ -1,17 +1,37 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState } from "react";
+
+import "./App.css";
+// import Sidebar from './components/layout/Sidebar'
+import { BrowserRouter, Routes, Route } from "react-router-dom";
+import MainLayout from "./components/layout/MainLayout";
+import DashboardPage from "./pages/DashboardPage";
+import ProjectsPage from "./pages/ProjectsPage";
+import ProjectDetailPage from "./pages/ProjectDetailPage";
+import LoginPage from "./pages/LoginPage";
+import RegisterPage from "./pages/RegisterPage";
+import ProfilePage from "./pages/ProfilePage";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <h1>My first full stack project</h1>
-        
-    </>
-  )
+    <BrowserRouter>
+      <Routes>
+        {/* public- unauth routes */}
+        <Route path="login" element={<LoginPage />} />
+        <Route path="register" element={<RegisterPage />} />
+
+        {/* authenticated routes  */}
+
+        <Route element={<MainLayout />}>
+          <Route path="/" element={<DashboardPage />} />
+          <Route path="/projects/" element={<ProjectsPage />}>
+            <Route path=":id" element={<ProjectDetailPage />} />
+          </Route>
+
+          <Route path="/profile" element={<ProfilePage />} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;
