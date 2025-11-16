@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { Home, FolderKanban, CheckSquare, User, LogOut } from "lucide-react";
+import { Home, FolderKanban, User, LogOut } from "lucide-react";
 
 export default function Sidebar() {
   const location = useLocation();
@@ -12,6 +12,7 @@ export default function Sidebar() {
   ];
 
 
+    // defining side bar structure
   return (
     <aside className="w-64 h-full bg-card border-r p-6 flex flex-col">
       <h1 className="text-xl font-bold mb-8">Project Manager</h1>
@@ -34,11 +35,13 @@ export default function Sidebar() {
             {link.name}
           </Link>
         ))}
-      <button className="flex items-center gap-2 p-2 rounded-md mt-4 text-red-500 hover:bg-red-100">
-        <LogOut size={18} /> Logout
-      </button>
-      </nav>
+       
+        
 
+        <button className="flex items-center gap-2 p-2 rounded-md mt-4 text-red-500 hover:bg-red-100">
+          <LogOut size={18} /> Logout
+        </button>
+      </nav>
     </aside>
   );
 }

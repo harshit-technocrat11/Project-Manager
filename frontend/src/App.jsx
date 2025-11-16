@@ -15,6 +15,13 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        {/* routing example - >  */}
+        {/* <Route path="xyz" element={renderpage}/> */}
+        {/* <Route
+          path="/schools"
+          element={<div>school of computer sciences</div>}
+        /> */}
+
         {/* public- unauth routes */}
         <Route path="login" element={<LoginPage />} />
         <Route path="register" element={<RegisterPage />} />
