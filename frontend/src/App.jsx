@@ -6,13 +6,16 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import MainLayout from "./components/layout/MainLayout";
 import DashboardPage from "./pages/DashboardPage";
 import ProjectsPage from "./pages/ProjectsPage";
-import ProjectDetailPage from "./pages/ProjectDetailPage";
+import ProjectDetailsPage from "./pages/ProjectDetailsPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
+import { Toaster } from "./components/ui/sonner";
 
 function App() {
   return (
+    <>
+    <Toaster/>
     <BrowserRouter>
       <Routes>
         {/* routing example - >  */}
@@ -30,14 +33,15 @@ function App() {
 
         <Route element={<MainLayout />}>
           <Route path="/" element={<DashboardPage />} />
-          <Route path="/projects/" element={<ProjectsPage />}>
-            <Route path=":id" element={<ProjectDetailPage />} />
-          </Route>
+          <Route path="/projects/" element={<ProjectsPage />}/>
+         
+          <Route path="/projects/id" element={<ProjectDetailsPage />} />
 
           <Route path="/profile" element={<ProfilePage />} />
         </Route>
       </Routes>
     </BrowserRouter>
+    </>
   );
 }
 

@@ -8,18 +8,31 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "../ui/textarea";
-import { Select,SelectTrigger,SelectValue,SelectContent,SelectItem } from "../ui/select";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "../ui/select";
 import { Plus } from "lucide-react";
 
-export function AddProjectModal({status, setStatus, projectName, setProjectName, projectDesc, setProjectDesc,formHandler}) {
+import { Toaster } from "../ui/sonner";
+import { toast } from "sonner";
 
- 
-
+export function AddProjectModal({
+  status,
+  setStatus,
+  projectName,
+  setProjectName,
+  projectDesc,
+  setProjectDesc,
+  formHandler,
+}) {
   return (
     <Dialog>
       <form>
@@ -77,14 +90,20 @@ export function AddProjectModal({status, setStatus, projectName, setProjectName,
             <DialogClose asChild>
               <Button variant="outline">Cancel</Button>
             </DialogClose>
-            <Button onClick={formHandler} type="submit">
-              Create
-            </Button>
+            <DialogClose asChild>
+              <Button
+                onClick={() => {
+                  formHandler();
+                  toast.success("Project has been created");
+                }}
+                type="submit"
+              >
+                Create
+              </Button>
+            </DialogClose>
           </DialogFooter>
         </DialogContent>
       </form>
     </Dialog>
   );
 }
-
-

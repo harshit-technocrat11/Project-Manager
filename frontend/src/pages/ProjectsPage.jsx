@@ -20,6 +20,8 @@ export default function ProjectsPage() {
      setProjectName("");
      setStatus("");
      setProjectDesc("");
+
+     
    };
   
 
@@ -57,6 +59,7 @@ export default function ProjectsPage() {
           description="A complete CRM dashboard system."
           tasks={20}
           status="Completed"
+          
         />
 
         <ProjectCard

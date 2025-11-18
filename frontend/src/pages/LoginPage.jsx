@@ -3,15 +3,17 @@
 // export default function LoginPage() {
 //   return <h1 className="text-2xl font-bold">Login</h1>;
 // }
-import { LoginForm } from "@/components/auth/Login-form"
+import { LoginForm } from "@/components/auth/Login-form";
 
 export default function Page() {
   return (
     <div className="flex bg-gray-300 min-h-svh w-full items-center justify-center p-6 md:p-10">
       <div className="w-full max-w-sm">
-      <h1 className="text-2xl mb-10 font-bold justify-self-center" >PERSONAL PROJECT MANAGER</h1>
+        <h1 className="text-2xl mb-10 font-bold justify-self-center">
+          PERSONAL PROJECT MANAGER
+        </h1>
         <LoginForm />
       </div>
     </div>
-  )
+  );
 }
