@@ -5,65 +5,69 @@ import TaskCard from "@/components/task/TaskCard";
 import { AddTaskModal } from "@/components/task/AddTaskModal";
 
 export default function ProjectDetailsPage({}) {
-    const [taskTitle, setTaskTitle] = useState("");
-    const [TaskDesc, setTaskDesc] = useState("");
-    const [status, setStatus] = useState("");
-    const [dueDate, setDueDate]= useState("")
-    const [priority, setPriority] = useState("")
-    
-    const formHandler = () => {
-      console.log({
-        title: taskTitle,
-        description: TaskDesc,
-        status: status,
-      });
 
-      // reset form
-      setTaskDesc("");
-      setStatus("");
-      setTaskTitle("");
-    };
-    
   const [tasks, setTasks] = useState([
     {
       id: 1,
+      description: "use express here",
       title: "Design APIs",
       priority: "high",
       status: "pending",
       dueDate: "today",
     },
     {
-      id: "2",
-      title: "Build register UI                                           ",
+      id: "23",
+      title: "Build register UI ",
+      description: "use reactjs",
       priority: "medium",
       status: "completed",
       dueDate: "Tomorrow",
     },
     {
-      id: "2",
-      title: "Build register UI                                           ",
+      id: "3",
+      title: "Build register UI ",
       priority: "low",
       status: "completed",
-      dueDate: "Tomorrow",
+      dueDate: "2025-11-20",
     },
     {
-      id: "2",
-      title: "Build register UI                                           ",
+      id: "222",
+      title: "Build register UI ",
       priority: "medium",
       status: "pending",
-      dueDate: "Tomorrow",
+      dueDate: "2025-11-21",
+    },
+    {
+      id: "22",
+      title: "refine frontend !!",
+      priority: "medium",
+      status: "pending",
+      dueDate: "2025-11-20",
     },
   ]);
 
-  const [filter, setfilter] = useState("all")
+  const [Taskfilter, setfilter] = useState("all");
+
+  //today filter
+  function isToday(task){
+    const date = new Date(task.dueDate);
+    const today = new Date();
+
+    return (
+      date.getDate() === today.getDate() && 
+      date.getMonth() === today.getMonth() && 
+      date.getFullYear() === today.getFullYear()
+    )
+  }
 
   // filter buttons -
-  const filteredTasks = tasks.filter((task) => {
-    if (filter === "all") return true;
-    if (filter === "pending") return task.status === "pending";
-    if (filter === "completed") return task.status === "completed";
-    if (filter === "today") return task.dueDate === "Today";
+  const filteredTasks = tasks?.filter((task) => {
+    if (Taskfilter === "all") return true;
+    if (Taskfilter === "pending") return task.status === "pending";
+    if (Taskfilter === "completed") return task.status === "completed";
+    if (Taskfilter === "today") return isToday(task);
   });
+
 
 
   return (
@@ -75,10 +79,8 @@ export default function ProjectDetailsPage({}) {
           <p className="text-muted-foreground">Short project description...</p>
         </div>
 
-        {/* <Button onClick={() => setOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" /> Add Task
-        </Button> */}
-        <AddTaskModal onAdd={(newtask)=> setTasks({...tasks, newtask}) }  />
+        {/* safer method (prev=> [...prev, newtask]) */}
+        <AddTaskModal onAdd={(newtask) => setTasks(prev =>[...prev, newtask ])} />
       </div>
 
       {/* Filters */}

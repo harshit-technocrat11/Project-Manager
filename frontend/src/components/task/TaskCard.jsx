@@ -23,8 +23,9 @@ export default function TaskCard({ task }) {
             {task.priority}
           </Badge>
 
-          <h3 className="font-medium text-base">{task.title}</h3>
+          <h3 className="font-medium text-xl ">{task.title}</h3>
         </div>
+          <p className="font-light p-2 text-base">{task.description}</p>
 
         {/* Due Date + Status */}
         <div className="flex gap-4 text-sm text-muted-foreground">

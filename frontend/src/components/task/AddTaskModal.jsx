@@ -29,46 +29,72 @@ import { fromTheme } from "tailwind-merge";
 
 export function AddTaskModal({onAdd}) {
 
-  //local form set up --- clean code k liye 
-  const [form , setForm] = useState({
-    title:"1",
-    description:"2",
-    priority: "2",
-    dueDate:"2"
-  })
-  
-  //to change- ip fields 
-  const handleChange=(e)=>{
-    setForm({...form, [e.target.value]: e.target.value})
-  }
+  const [title, setTitle] = useState("")
+  const [taskDesc, setTaskDesc] = useState("")
+  const [priority, setPriority] = useState("medium")
+  const [dueDate, setDueDate] = useState(new Date())
+  const [status, setStatus] = useState("pending")
 
+  //to change- ip fields 
+  // const handleChange=(e)=>{
+  //   setForm({...form, [e.target.value]: e.target.value})
+  // }
+
+  const handleTitleChange=(e)=>{
+    setTitle(e.target.value)
+  }
+  const handleTaskDescChange=(e)=>{
+    setTaskDesc(e.target.value)
+  }
+  const handleDateChange = (e) => {
+    setDueDate(e.target.value);
+  };
 
   // to change select - field
 
-  const handleSelect = (e) =>{
-      setForm({...form, priority:value})
+  const handleSelectPriority = (value) =>{
+      setPriority(value);
   }
 
   const handleAddTask=() =>{
+    // validations
+    if ( title.trim() < 3){ 
+      toast.error("title must be atleast 3 characters long!")
+      return;
+    }
 
+    //desc size limit 
+    if( taskDesc.length> 40){
+      toast.error("description too long !")
+    }
+
+    // prevent past date submits 
+    if (dueDate && new Date(dueDate)< new Date()){
+      toast.error("date cannot be in the past!! ")
+      return;
+    }
+    
     const newTask = {
-      id: crypto.randomUUID,
-      title: form.title,
-      priority: form.priority,
-      dueDate: form.dueDate || null,
-      status: "pending", // default
+      id: crypto.randomUUID(),
+      title: title,
+      priority: priority,
+      description: taskDesc,
+      dueDate: dueDate || null,
+      status: status, // default
     };
     console.log(newTask)
 
+    toast.success("task created");
     onAdd(newTask)
 
     //reset form
-    setForm({
-      title: "",
-      description: "",
-      priority: "medium",
-      dueDate: "",
-    });
+
+
+  setTitle("");
+  setTaskDesc("");
+  setPriority("medium");
+  setDueDate("today");
+  setStatus("pending");
 
   }
   
@@ -90,8 +116,8 @@ export function AddTaskModal({onAdd}) {
             <Input
               name="title"
               placeholder="Task title"
-              value={form.title}
-              onChange={handleChange}
+              value={title}
+              onChange={handleTitleChange}
             />
           </div>
 
@@ -101,8 +127,8 @@ export function AddTaskModal({onAdd}) {
             <Textarea
               name="description"
               placeholder="Short description..."
-              value={form.description}
-              onChange={handleChange}
+              value={taskDesc}
+              onChange={handleTaskDescChange}
             />
           </div>
 
@@ -110,10 +136,7 @@ export function AddTaskModal({onAdd}) {
           <div className="space-y-2">
             <Label>Priority</Label>
 
-            <Select
-              value={form.priority}
-              onValueChange={handleSelect}
-            >
+            <Select value={priority} onValueChange={handleSelectPriority}>
               <SelectTrigger>
                 <SelectValue placeholder="Select priority" />
               </SelectTrigger>
@@ -132,8 +155,8 @@ export function AddTaskModal({onAdd}) {
             <Input
               type="date"
               name="dueDate"
-              value={form.dueDate}
-              onChange={handleChange}
+              value={dueDate}
+              onChange={handleDateChange}
             />
           </div>
         </div>
@@ -146,7 +169,6 @@ export function AddTaskModal({onAdd}) {
             <Button
               onClick={() => {
                 handleAddTask();
-                toast.success("task created");
               }}
               type="submit"
             >
