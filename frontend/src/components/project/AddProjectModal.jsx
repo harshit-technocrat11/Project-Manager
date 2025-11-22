@@ -20,19 +20,75 @@ import {
   SelectItem,
 } from "../ui/select";
 import { Plus } from "lucide-react";
-
 import { Toaster } from "../ui/sonner";
 import { toast } from "sonner";
+import { useSearchParams } from "react-router-dom";
+import { useState } from "react";
 
-export function AddProjectModal({
-  status,
-  setStatus,
-  projectName,
-  setProjectName,
-  projectDesc,
-  setProjectDesc,
-  formHandler,
+
+
+export function AddProjectModal({onAdd
 }) {
+
+   const getToday = () => {
+     // to get the local date!!
+     return new Date().toLocaleDateString().split("T")[0];
+   };
+     const [projectName, setProjectName] = useState("");
+     const [projectDesc, setProjectDesc] = useState("");
+   
+     const [status, setStatus] = useState("In Progress");
+     const [dateCreated, setDateCreated] = useState(getToday())
+    
+
+     //helper functions --> onChange for the modal
+    const onNameChange=()=>{}
+    
+
+
+      const handleAddProject = () => {
+        // validations
+        if (projectName.trim() < 3) {
+          toast.error("title must be atleast 3 characters long!");
+          return;
+        }
+
+        //desc size limit
+        if (projectDesc.length > 40) {
+          toast.error("description too long !");
+        }
+
+        // prevent past date submits
+        // if (dueDate) {
+        //   if (dueDate < getToday()) {
+        //     toast.error("Due date cannot be in the past");
+        //     return;
+        //   }
+        // }
+
+        const newProject = {
+          id: crypto.randomUUID(),
+          name: projectName,
+
+          description: projectDesc,
+          dateCreated: dateCreated,
+          status: status, // default
+        };
+        console.log(newProject);
+
+        toast.success("Project created");
+        onAdd(newProject)
+
+        //reset form
+
+        setProjectName("");
+        setProjectDesc("");
+
+        setDateCreated(getToday());
+        
+      };
+     
+
   return (
     <Dialog>
       <form>
@@ -50,7 +106,9 @@ export function AddProjectModal({
           <div className="space-y-4">
             {/* Project Name */}
             <div className="space-y-2">
-              <label className="text-sm font-medium">Project Name</label>
+              <label className="text-sm font-medium" value={projectName}>
+                Project Name
+              </label>
               <Input
                 placeholder="Enter project name"
                 value={projectName}
@@ -72,14 +130,13 @@ export function AddProjectModal({
             <div className="space-y-2">
               <label className="text-sm font-medium">Status</label>
               <Select
-                value={status}
+
                 onValueChange={(value) => setStatus(value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select status" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="pending">🟨Pending </SelectItem>
                   <SelectItem value="in-progress">🟦In Progress </SelectItem>
                   <SelectItem value="completed">🟢Completed </SelectItem>
                 </SelectContent>
@@ -93,7 +150,7 @@ export function AddProjectModal({
             <DialogClose asChild>
               <Button
                 onClick={() => {
-                  formHandler();
+                  handleAddProject();
                   toast.success("Project has been created");
                 }}
                 type="submit"

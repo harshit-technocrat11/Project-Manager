@@ -1,3 +1,13 @@
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+
 import {
   Card,
   CardHeader,
@@ -8,37 +18,51 @@ import {
 import { Badge } from "@/components/ui/badge";
 
 import { Link } from "react-router-dom";
-export default function ProjectCard({ title, description, tasks, status }) {
+export default function ProjectCard({ project, onClick, onDelete }) {
   return (
-    <Link to={{
-      pathname:"/projects/id"
-    }}>
-      <Card className="border-2 px-4 py-6 rounded-lg transform  duration-500 hover:scale-101 hover:shadow-md transition-shadow cursor-pointer">
-        <CardHeader>
-          <CardTitle className="text-xl">{title}</CardTitle>
-          <p className="text-sm text-muted-foreground">{description}</p>
-        </CardHeader>
+    <Card
+      onClick={onClick}
+      className="border-2 px-4 py-6 rounded-lg transform  duration-500 hover:scale-101 hover:shadow-md transition-shadow cursor-pointer"
+    >
+      <CardHeader>
+        <CardTitle className="text-xl">{project.name}</CardTitle>
+        <p className="text-sm text-muted-foreground">{project.description}</p>
+      </CardHeader>
 
-        <CardContent>
-          <p className="text-sm">
-            <span className="font-semibold">{tasks}</span> tasks
-          </p>
-        </CardContent>
+      <CardContent>
+        <p className="text-sm">
+          <span className="font-semibold">{project.tasks}</span> tasks
+        </p>
+      </CardContent>
 
-        <CardFooter>
-          <Badge
-            className={
-              status === "Completed"
-                ? "bg-green-500"
-                : status === "In Progress"
-                ? "bg-blue-500"
-                : "bg-yellow-500"
-            }
-          >
-            {status}
-          </Badge>
-        </CardFooter>
-      </Card>
-    </Link>
+      <CardFooter>
+        <Badge
+          className={
+            project.status === "Completed"
+              ? "bg-green-500"
+              : project.status === "In Progress"
+              ? "bg-blue-500"
+              : "bg-yellow-500"
+          }
+        >
+          {project.status}
+        </Badge>
+      </CardFooter>
+
+      {/* Right Section */}
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button className="p-2" variant="outline">
+            options
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => onDelete(project.id)}>
+            ❌Delete{" "}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </Card>
   );
 }

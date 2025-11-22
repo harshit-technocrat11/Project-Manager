@@ -5,7 +5,6 @@ import TaskCard from "@/components/task/TaskCard";
 import { AddTaskModal } from "@/components/task/AddTaskModal";
 
 export default function ProjectDetailsPage({}) {
-
   const [tasks, setTasks] = useState([
     {
       id: 1,
@@ -49,15 +48,15 @@ export default function ProjectDetailsPage({}) {
   const [Taskfilter, setfilter] = useState("all");
 
   //today filter
-  function isToday(task){
+  function isToday(task) {
     const date = new Date(task.dueDate);
     const today = new Date();
 
     return (
-      date.getDate() === today.getDate() && 
-      date.getMonth() === today.getMonth() && 
+      date.getDate() === today.getDate() &&
+      date.getMonth() === today.getMonth() &&
       date.getFullYear() === today.getFullYear()
-    )
+    );
   }
 
   // filter buttons -
@@ -68,7 +67,27 @@ export default function ProjectDetailsPage({}) {
     if (Taskfilter === "today") return isToday(task);
   });
 
+  //for edit task modal
+  const [selectedTask, setSelectedTask] = useState(null);
 
+  // const openEditTaskModal = () => {
+  //   console.log("clikedd");
+  //   return <EditTaskModal open={open} />;
+  // };
+const handleToggleStatus = (id) => {
+  setTasks((prev) =>
+    prev.map((t) =>
+      t.id === id
+        ? { ...t, status: t.status === "pending" ? "completed" : "pending" }
+        : t
+    )
+  );
+};
+
+//delete task
+  const HandleDelete = (id) => {
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+  };
 
   return (
     <div className="space-y-8">
@@ -80,9 +99,10 @@ export default function ProjectDetailsPage({}) {
         </div>
 
         {/* safer method (prev=> [...prev, newtask]) */}
-        <AddTaskModal onAdd={(newtask) => setTasks(prev =>[...prev, newtask ])} />
+        <AddTaskModal
+          onAdd={(newtask) => setTasks((prev) => [...prev, newtask])}
+        />
       </div>
-
       {/* Filters */}
       <div className="flex gap-3">
         <Button onClick={() => setfilter("all")} variant="outline">
@@ -98,16 +118,20 @@ export default function ProjectDetailsPage({}) {
           Completed
         </Button>
       </div>
-
+      
       {/* Task Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTasks.map((task) => (
-          <TaskCard task={task} />
+          <TaskCard
+            key={task.id}
+            task={task}
+            onDelete={HandleDelete}
+            toggleComplete={handleToggleStatus}
+            onClick={() => setSelectedTask(task)}
+          />
         ))}
       </div>
-
-      {/* Add Task Modal */}
-      {/* <AddTaskModal open={open} setOpen={setOpen} /> */}
+     
     </div>
   );
 }

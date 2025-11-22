@@ -27,53 +27,59 @@ import { toast } from "sonner";
 import { useState } from "react";
 import { fromTheme } from "tailwind-merge";
 
-export function AddTaskModal({onAdd}) {
+export function AddTaskModal({ onAdd }) {
+  const getToday = () => {
+    // to get the local date!!
+    return new Date().toLocaleDateString().split("T")[0];
+  };
 
-  const [title, setTitle] = useState("")
-  const [taskDesc, setTaskDesc] = useState("")
-  const [priority, setPriority] = useState("medium")
-  const [dueDate, setDueDate] = useState(new Date())
-  const [status, setStatus] = useState("pending")
+  const [title, setTitle] = useState("");
+  const [taskDesc, setTaskDesc] = useState("");
+  const [priority, setPriority] = useState("medium");
+  const [dueDate, setDueDate] = useState(getToday());
+  const [status, setStatus] = useState("pending");
 
-  //to change- ip fields 
+  //to change- ip fields
   // const handleChange=(e)=>{
   //   setForm({...form, [e.target.value]: e.target.value})
   // }
 
-  const handleTitleChange=(e)=>{
-    setTitle(e.target.value)
-  }
-  const handleTaskDescChange=(e)=>{
-    setTaskDesc(e.target.value)
-  }
+  const handleTitleChange = (e) => {
+    setTitle(e.target.value);
+  };
+  const handleTaskDescChange = (e) => {
+    setTaskDesc(e.target.value);
+  };
   const handleDateChange = (e) => {
     setDueDate(e.target.value);
   };
 
   // to change select - field
 
-  const handleSelectPriority = (value) =>{
-      setPriority(value);
-  }
+  const handleSelectPriority = (value) => {
+    setPriority(value);
+  };
 
-  const handleAddTask=() =>{
+  const handleAddTask = () => {
     // validations
-    if ( title.trim() < 3){ 
-      toast.error("title must be atleast 3 characters long!")
+    if (title.trim() < 3) {
+      toast.error("title must be atleast 3 characters long!");
       return;
     }
 
-    //desc size limit 
-    if( taskDesc.length> 40){
-      toast.error("description too long !")
+    //desc size limit
+    if (taskDesc.length > 40) {
+      toast.error("description too long !");
     }
 
-    // prevent past date submits 
-    if (dueDate && new Date(dueDate)< new Date()){
-      toast.error("date cannot be in the past!! ")
-      return;
+    // prevent past date submits
+    if (dueDate) {
+      if (dueDate < getToday()) {
+        toast.error("Due date cannot be in the past");
+        return;
+      }
     }
-    
+
     const newTask = {
       id: crypto.randomUUID(),
       title: title,
@@ -82,22 +88,20 @@ export function AddTaskModal({onAdd}) {
       dueDate: dueDate || null,
       status: status, // default
     };
-    console.log(newTask)
+    console.log(newTask);
 
     toast.success("task created");
-    onAdd(newTask)
+    onAdd(newTask);
 
     //reset form
 
+    setTitle("");
+    setTaskDesc("");
+    setPriority("medium");
+    setDueDate(getToday());
+    setStatus("pending");
+  };
 
-  setTitle("");
-  setTaskDesc("");
-  setPriority("medium");
-  setDueDate("today");
-  setStatus("pending");
-
-  }
-  
   return (
     <Dialog>
       <DialogTrigger asChild>

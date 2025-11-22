@@ -13,6 +13,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { AddProjectModal } from "@/components/project/AddProjectModal";
 
 
 export default function DashboardPage() {
@@ -22,9 +23,7 @@ export default function DashboardPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
 
-        <Button>
-          <Plus className="mr-2 h-4 w-4" /> Create Project
-        </Button>
+       <AddProjectModal/>
       </div>
 
       {/* stats card */}
