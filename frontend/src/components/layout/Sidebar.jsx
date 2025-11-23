@@ -1,5 +1,6 @@
 import { Link, useLocation } from "react-router-dom";
 import { Home, FolderKanban, User, LogOut } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Sidebar() {
   const location = useLocation();
@@ -10,6 +11,8 @@ export default function Sidebar() {
     
     { name: "Profile", path: "/profile", icon: <User size={18} /> },
   ];
+
+  const {logout} = useAuth();
 
 
     // defining side bar structure
@@ -35,10 +38,11 @@ export default function Sidebar() {
             {link.name}
           </Link>
         ))}
-       
-        
 
-        <button className="flex items-center gap-2 p-2 rounded-md mt-4 text-red-500 hover:bg-red-100">
+        <button
+          onClick={logout}
+          className="flex items-center gap-2 p-2 rounded-md mt-4 text-red-500 hover:bg-red-100"
+        >
           <LogOut size={18} /> Logout
         </button>
       </nav>

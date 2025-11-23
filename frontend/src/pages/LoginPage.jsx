@@ -3,7 +3,7 @@
 // export default function LoginPage() {
 //   return <h1 className="text-2xl font-bold">Login</h1>;
 // }
-import { LoginForm } from "@/components/auth/Login-form";
+import { LoginForm } from "@/components/auth/LoginForm";
 
 export default function Page() {
   return (

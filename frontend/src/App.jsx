@@ -11,36 +11,58 @@ import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ProfilePage from "./pages/ProfilePage";
 import { Toaster } from "./components/ui/sonner";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
     <>
-    <Toaster/>
-    <BrowserRouter>
-      <Routes>
-        {/* routing example - >  */}
-        {/* <Route path="xyz" element={renderpage}/> */}
-        {/* <Route
+      <Toaster />
+      <BrowserRouter>
+        <Routes>
+          {/* routing example - >  */}
+          {/* <Route path="xyz" element={renderpage}/> */}
+          {/* <Route
           path="/schools"
           element={<div>school of computer sciences</div>}
         /> */}
 
-        {/* public- unauth routes */}
-        <Route path="login" element={<LoginPage />} />
-        <Route path="register" element={<RegisterPage />} />
+          {/* public- unauth routes */}
+          <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
 
-        {/* authenticated routes  */}
+          {/* authenticated routes  */}
 
-        <Route element={<MainLayout />}>
-          <Route path="/" element={<DashboardPage />} />
-          <Route path="/projects/" element={<ProjectsPage />}/>
-         
-          <Route path="/projects/:id" element={<ProjectDetailsPage />} />
+          <Route element={<MainLayout />}>
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <DashboardPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/projects/"
+              element={
+                <ProtectedRoute>
+                  <ProjectsPage />
+                </ProtectedRoute>
+              }
+            />
 
-          <Route path="/profile" element={<ProfilePage />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+            <Route
+              path="/projects/:id"
+              element={
+                <ProtectedRoute>
+                  <ProjectDetailsPage />
+                </ProtectedRoute>
+              }
+            />
+
+            <Route path="/profile" element={<ProfilePage />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
     </>
   );
 }
