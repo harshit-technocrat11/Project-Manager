@@ -27,7 +27,7 @@ export const AuthProvider = ({ children }) => {
 
     //storing it
     console.log("user - ", userData);
-    console.log("token-", jwtToken)
+    console.log("token-", jwtToken);
 
     localStorage.setItem("user", JSON.stringify(userData));
     localStorage.setItem("token", jwtToken);
@@ -36,26 +36,27 @@ export const AuthProvider = ({ children }) => {
   const logout = () => {
     setUser(null);
     setToken("");
-    console.log("bye")
+    console.log("bye");
 
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    
-
   };
 
   return (
     //it provides the value - funcs globally to the children
-    <AuthContext.Provider  value={{ isAuthenticated, login, logout, user, token}}>
+    <AuthContext.Provider
+      value={{ isAuthenticated, login, logout, user, token }}
+    >
       {children}
     </AuthContext.Provider>
-  )
+  );
 };
 
-// authContext hook --- 
 
-export const useAuth = ()=> useContext(AuthContext)
+// authContext hook ---
 
-// instead of writing --> const {token  , isAuthenticated} = useContext(AuthContext)  everytime -- we can simply write 
+export const useAuth = () => useContext(AuthContext);
 
-// const {token } = useAuth () 
+// instead of writing --> const {token  , isAuthenticated} = useContext(AuthContext)  everytime -- we can simply write
+
+// const {token } = useAuth ()
