@@ -6,6 +6,7 @@ import { Router } from "express";
 
 
 import dotenv from "dotenv"
+import projectRouter from "./routes/project-routes.js";
 dotenv.config();
 
 const app = express();
@@ -23,5 +24,7 @@ app.get("/", (req,res)=>{
 })
 
 app.use("/api/", UserRouter);
+
+app.use("/api/projects", projectRouter)
 
 export default app;
