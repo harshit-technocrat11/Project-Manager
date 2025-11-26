@@ -14,32 +14,60 @@ export async function handleAddMember(req, res) {
       return res.status(400).json({ msg: "email is a required field !" });
     }
 
-    const project = await Project.findById({ projectId });
+    const project = await Project.findById(projectId );
 
     if (!project) {
       return res.status(404).json({ msg: "Project not found 404" });
     }
 
     // only owner can add members
-    // req.user.id -> if form auth m/w
+    // req.user.id -> CURRENT user from authmiddleware
     // project.owner --> id converted from mongooseObjectId type to normal string
+
+    // checking if CURNT- USER is not the OWNER
     if (project.owner.toString() !== req.user.id) {
       return res
         .status(403)
-        .json({ message: "Only project owner can add members" });
+        .json({ msg: "Only project owner can add members" });
     }
 
     //if user acc already exissts
-    const user = await User.findOne({ email });
+    const userToBeAdded = await User.findOne({ email });
 
-    // prevent duplicate addition
+    // is the member already a part of the proj ?
     const alreadyMember = project.members.find(
       (m) => m.email.toLowerCase() === email.toLowerCase()
     );
 
-    // add member entry ---
-    project.members.push({});
-  } catch (err) {}
+    if ( alreadyMember){
+        return res.status(400).json({ msg: "user already added" });
+    }
+
+    // add member entry ( userId = null , if User DNE)
+    project.members.push({
+      user: userToBeAdded ? userToBeAdded._id : null,
+      email,
+      role: "member",
+    });
+
+    await project.save(); //new member added to DB (after signup) --> members:[] list
+
+    // send email
+    await sendEmail({
+      toEmail: email,
+      projectName: project.title,
+      projectId: project._id,
+    });
+
+    return res.status(200).json({
+      message: "Invitation sent successfully",
+      members: project.members,
+    });
+
+  } catch (err) {
+     console.error("add member error - ", err);
+     return res.status(500).json({ msg: "Server error" });
+  }
 }
 
 export async function handleGetMembers(req, res) {
@@ -68,5 +96,30 @@ export async function handleGetMembers(req, res) {
 
 export async function handleRemoveMember(req, res) {
   try {
-  } catch (err) {}
+    const {memberId, projectId} = req.params
+
+    const project = await Project.findById(projectId)
+
+      if (!project) {
+        return res.status(404).json({ msg: "Project not found 404" });
+      }
+
+    //  owner can only remove 
+    if (project.owner.toString() !== req.user.id) {
+      return res
+        .status(403)
+        .json({ message: "Only the project-owner can remove members" });
+    }
+
+    project.members = project.members.filter((m)=> m.user.toString() !== memberId)
+    
+    await project.save()
+
+    return res.status(200).json({ msg: "Member removed successfully" });
+
+  } 
+  catch (err) {
+     console.error("Remove Member Error ", err);
+     return res.status(500).json({ msg: "Server error" });
+  }
 }
