@@ -15,7 +15,28 @@ const projectSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: true
-   }
+   },
+   members:[
+      {
+         user: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "User",
+            required: true,
+         },
+         email: {
+            type: String,
+            required: true,
+            ref: "User"
+         },
+         role: {
+            type: String ,
+            enum: ["member", "admin"] ,
+            default : "member",
+         }
+ 
+         
+      }
+   ]
 },
 {timestamps: true})
 
