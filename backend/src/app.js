@@ -1,12 +1,13 @@
 import express, { urlencoded } from "express"
 import cors from "cors"
 import UserRouter from "./routes/auth.js";
-import { Router } from "express";
+
 
 
 
 import dotenv from "dotenv"
 import projectRouter from "./routes/project-routes.js";
+import MemberRouter from "./routes/member-routes.js";
 dotenv.config();
 
 const app = express();
@@ -26,5 +27,7 @@ app.get("/", (req,res)=>{
 app.use("/api/", UserRouter);
 
 app.use("/api/projects", projectRouter)
+
+app.use("api/members", MemberRouter)
 
 export default app;
