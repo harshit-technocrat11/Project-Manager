@@ -33,7 +33,6 @@ const projectSchema = new mongoose.Schema({
             enum: ["member", "admin"] ,
             default : "member",
          }
- 
          
       }
    ]

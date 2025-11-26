@@ -56,7 +56,7 @@ export async function handleDeleteProject(req, res) {
   }
 }
 
-// UPDATE
+// update
 export async function handleUpdateProject(req, res) {
   try {
     const projectId = req.params.projectId;
