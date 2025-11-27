@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs"
 
 import User from "../models/User.js"
 import { generatetoken } from "../utils/generateToken.js";
+import Project from "../models/Project.js";
 
 // register 
 export  async function registerUser(req,res) {
@@ -30,6 +31,21 @@ export  async function registerUser(req,res) {
             email, 
             password: hashedPassword
         }) 
+
+        //fresh signedup user --> add to project members list 
+
+        // when a new user has registered---> after cliking the invitation --> then update the user to have user: userId
+        await Project.updateMany(
+            // filter
+           {
+            "members.email": email,
+             "members.user": null
+           },
+           {
+            $set : {"members.$.user" : user._id} //userId set
+           }
+
+        )
 
         //creating jwt token 
         const token = generatetoken(user._id, email);
