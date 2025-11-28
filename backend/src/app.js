@@ -28,6 +28,6 @@ app.use("/api/", UserRouter);
 
 app.use("/api/projects", projectRouter)
 
-app.use("api/members", MemberRouter)
+app.use("/api/members", MemberRouter)
 
 export default app;

@@ -111,7 +111,7 @@ export async function handleRemoveMember(req, res) {
         .json({ message: "Only the project-owner can remove members" });
     }
 
-    project.members = project.members.filter((m)=> m.user.toString() !== memberId)
+    project.members = project.members.filter((m)=> m.user?.toString() !== memberId)
     
     await project.save()
 

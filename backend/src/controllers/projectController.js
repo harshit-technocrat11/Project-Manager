@@ -16,7 +16,7 @@ export async function handleCreateProject(req, res) {
       owner: req.user.id,
     });
 
-    return res.status(200).json({ msg: "project created successfully " });
+    return res.status(200).json({ msg: "project created successfully ","project":project });
   } catch (err) {
     console.error("create project error", err);
     return res.status(500).json({ msg: "internal server error" });

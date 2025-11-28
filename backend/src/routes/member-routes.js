@@ -5,18 +5,21 @@ import {
     handleAddMember, 
     handleRemoveMember,
     handleGetMembers,
-} from ""
+} from "../controllers/memberController.js"
 
 const MemberRouter = Router();
 
-MemberRouter.use("/:projectId", authMiddleware)
 
-  //    /:projectId/add
-  //   /:projectId/    
-  //  /:projectId/:memberId
+// protection
+MemberRouter.use(authMiddleware);
 
-  .post("/add", handleAddMember)
-  .get("/", handleGetMembers)
-  .delete("/remove/:memberId", handleRemoveMember);
+// POST /api/members/:projectId/add
+MemberRouter.post("/:projectId/add", handleAddMember);
+
+// GET /api/members/:projectId
+MemberRouter.get("/:projectId", handleGetMembers);
+
+// DELETE /api/members/:projectId/remove/:memberId
+MemberRouter.delete("/:projectId/remove/:memberId", handleRemoveMember);
 
 export default MemberRouter

@@ -16,7 +16,7 @@ export default async function sendEmail({ toEmail, projectName, projectId }) {
   const inviteLink = `${process.env.FRONTEND_URL}/invite?projectId=${projectId}&email=${toEmail}`;
 
   const mailOptions = {
-    from: `"Project Manager" ${process.env.SMTP_USER}`,
+    from: `"Project Manager" <${process.env.MAIL_SENDER}>`,
     to: toEmail,
     subject: `You have been invited to collaborate on the project: ${projectName}`,
     html: `
