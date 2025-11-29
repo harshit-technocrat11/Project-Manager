@@ -8,6 +8,7 @@ import UserRouter from "./routes/auth.js";
 import dotenv from "dotenv"
 import projectRouter from "./routes/project-routes.js";
 import MemberRouter from "./routes/member-routes.js";
+import TaskRouter from "./routes/task-routes.js";
 dotenv.config();
 
 const app = express();
@@ -29,5 +30,7 @@ app.use("/api/", UserRouter);
 app.use("/api/projects", projectRouter)
 
 app.use("/api/members", MemberRouter)
+
+app.use("/api/tasks", TaskRouter)
 
 export default app;
