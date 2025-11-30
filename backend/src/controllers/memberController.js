@@ -1,8 +1,9 @@
 import Project from "../models/Project.js";
-
+import {Task} from "../models/Task.js"
 import User from "../models/User.js";
 
 import sendEmail from "../utils/sendEmail.js";
+import { isOwner } from "./helpers/isOwner.js";
 
 // add member to a project
 export async function handleAddMember(req, res) {
@@ -97,6 +98,7 @@ export async function handleGetMembers(req, res) {
 export async function handleRemoveMember(req, res) {
   try {
     const {memberId, projectId} = req.params
+    const currentUserId = req.user.id;
 
     const project = await Project.findById(projectId)
 
@@ -105,21 +107,46 @@ export async function handleRemoveMember(req, res) {
       }
 
     //  owner can only remove 
-    if (project.owner.toString() !== req.user.id) {
+    if (!isOwner(project, currentUserId)) {
       return res
         .status(403)
         .json({ message: "Only the project-owner can remove members" });
     }
 
-    project.members = project.members.filter((m)=> m.user?.toString() !== memberId)
+    // project.members = project.members.filter((m)=> m.user?.toString() !== memberId)
     
+    // owners cannot remove themselves
+    if ( memberId=== currentUserId){
+      return res.status(404).json({msg: "owner cannot remove themselves from the project"})
+    }
+
+    const memberEntry  = project.members.id(memberId);
+    if ( !memberEntry){
+       return res.status(404).json({ message: "Member not found" });
+    }
+
+    // storing before removing 
+    const removedUserId = memberEntry.user; 
+
+    memberEntry.remove();
     await project.save()
+
+
+    //unassigning tasks - assigned to removedId
+
+    //null for unregistered Id
+    if ( removedUserId){
+      await Task.updateMany(
+        { assignedTo: removedUserId, project: projectId},
+        { $set: { assignedTo: null}}
+      )
+    }
 
     return res.status(200).json({ msg: "Member removed successfully" });
 
   } 
   catch (err) {
-     console.error("Remove Member Error ", err);
+     console.error("error occurred while Removing Member ", err);
      return res.status(500).json({ msg: "Server error" });
   }
 }
