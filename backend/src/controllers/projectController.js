@@ -49,14 +49,23 @@ export async function handleDeleteProject(req, res) {
   try {
     const projectId = req.params.projectId;
 
+    const project = await Project.findById(projectId);
+    if (!isOwner(project, req.user.id)) {
+      return res
+        .status(403)
+        .json({
+          msg: "unauthorized access , only project Owner can delete projects",
+        });
+    }
     //checking if project exists
-    const project = await Project.findOneAndDelete({
+    
+    project = await Project.findOneAndDelete({
       _id: projectId,
       owner: req.user.id,
     });
-
+    
     if (!project) {
-      res.status(404).json({ msg: "project not found or unauthorized" });
+      res.status(404).json({ msg: "project not found" });
     }
     return res.status(200).json({ msg: "Project deleted successfully" });
   } catch (err) {
@@ -72,7 +81,12 @@ export async function handleUpdateProject(req, res) {
 
     const { title, description } = req.body;
 
-    const project = await Project.findOneAndUpdate(
+    const project = await Project.findById(projectId)
+    if ( !isOwner(project, req.user.id)){
+      return res.status(403).json({ msg: "unauthorized access , only project Owner can update projects" });
+    }
+
+    project = await Project.findOneAndUpdate(
       { _id: projectId, owner: req.user.id }, //filter
       { title, description }, //updated val
       { new: true }
@@ -81,7 +95,7 @@ export async function handleUpdateProject(req, res) {
     if (!project) {
       return res
         .status(404)
-        .json({ msg: "Project not found or unauthorized" });
+        .json({ msg: "Project not found" });
     }
 
   } catch (err) {

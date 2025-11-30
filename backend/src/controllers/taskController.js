@@ -120,7 +120,7 @@ export async function editTask(req, res) {
 
 export async function deleteTask(req, res) {
   try {
-    const taskId = req.params;
+    const {taskId} = req.params;
     const currentUserId = req.user.id;
 
     const task = await Task.findById(taskId);
