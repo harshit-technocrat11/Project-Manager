@@ -17,6 +17,8 @@ export const authMiddleware= (req,res,next) =>{
 
         //storing in req
         req.user = decoded;
+
+        console.log("logged in : ", req.user)
         next ();
     }
     catch (err) {

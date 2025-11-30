@@ -1,4 +1,5 @@
 import Project from "../models/Project.js";
+import { isOwner } from "./helpers/isOwner.js";
 
 // create
 export async function handleCreateProject(req, res) {
@@ -26,7 +27,15 @@ export async function handleCreateProject(req, res) {
 // get all 
 export async function handleGetAllProjects(req, res) {
   try {
-    const projects = await Project.find();
+    // only the project users - members/owner can view the list 
+
+    const projects =  await Project.find( {
+     $or : [
+        {owner: req.user.id } // current user
+        , {"members.user": req.user.id}
+      ]
+    })
+    
 
     res.status(200).json({ msg: "all projects are:-", projects: projects });
   } catch (err) {

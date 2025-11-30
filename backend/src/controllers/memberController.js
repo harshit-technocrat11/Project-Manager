@@ -120,6 +120,7 @@ export async function handleRemoveMember(req, res) {
       return res.status(404).json({msg: "owner cannot remove themselves from the project"})
     }
 
+    // memberEntry- mongo obj Id
     const memberEntry  = project.members.id(memberId);
     if ( !memberEntry){
        return res.status(404).json({ message: "Member not found" });
@@ -132,9 +133,9 @@ export async function handleRemoveMember(req, res) {
     await project.save()
 
 
-    //unassigning tasks - assigned to removedId
+    //unassigning the tasks - assigned to removedId
 
-    //null for unregistered Id
+    //already null for unregistered Id
     if ( removedUserId){
       await Task.updateMany(
         { assignedTo: removedUserId, project: projectId},

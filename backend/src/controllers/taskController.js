@@ -9,10 +9,10 @@ export async function createTask(req, res) {
     const { title, description, dueDate, priority, assignedTo } = req.body;
     const projectId = req.params.projectId;
 
-    if (!title || !description) {
+    if (!title ) {
       return res
         .status(400)
-        .json({ msg: "task title and description are mandatory fields!" });
+        .json({ msg: "task 'title' - mandatory field!" });
     }
 
     const project = await Project.findById(projectId);
@@ -103,7 +103,7 @@ export async function editTask(req, res) {
     const updatedTask = await Task.findByIdAndUpdate(
       taskId,
       { $set: req.body },
-      { new: True }
+      { new: true }
     );
 
     return res.status(200).json({
@@ -148,17 +148,17 @@ export async function getTasks(req, res) {
     const projectId = req.params.projectId;
     const project = await Project.findById(projectId)
 
+    const currentUserId = req.user.id
+
     if (!project) {
       return res.status(404).json({ msg: "Project not found." });
     }
-    
+
+    console.log("inside getTasks, current userid ",currentUserId)
+
     // authorization check  
-    if (
-      !(
-        isOwner(project, currentUserId) ||
-        isProjectMember(project, currentUserId)
-      )
-    ) {
+    if ( ! (isOwner(project, currentUserId) || isProjectMember(project, currentUserId)) )
+    {
       return res
         .status(403)
         .json({ msg: "Access denied. You are not a member of this project." });
