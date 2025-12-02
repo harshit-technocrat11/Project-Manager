@@ -24,7 +24,7 @@ function App() {
           {/* <Route
           path="/schools"
           element={<div>school of computer sciences</div>}
-        /> */}
+          /> */}
 
           {/* public- unauth routes */}
           <Route path="login" element={<LoginPage />} />
@@ -34,7 +34,7 @@ function App() {
 
           <Route element={<MainLayout />}>
             <Route
-              path="/"
+              path="/dashboard"
               element={
                 <ProtectedRoute>
                   <DashboardPage />

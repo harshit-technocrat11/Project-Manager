@@ -3,8 +3,6 @@ import cors from "cors"
 import UserRouter from "./routes/auth.js";
 
 
-
-
 import dotenv from "dotenv"
 import projectRouter from "./routes/project-routes.js";
 import MemberRouter from "./routes/member-routes.js";
@@ -17,6 +15,15 @@ const app = express();
 app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
+
+app.use(
+cors({
+    origin: "http://localhost:5173",
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+  })
+);
 
 
 

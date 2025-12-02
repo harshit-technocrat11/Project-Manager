@@ -1,57 +1,129 @@
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, use, useContext, useEffect, useState } from "react";
 import { Navigate } from "react-router-dom";
+
+import { api } from "@/api/api.js";
 
 export const AuthContext = createContext();
 
 //we pass the children --> children level components and tags
 // so Authprovider ==  wrapper
 export const AuthProvider = ({ children }) => {
-  //first state
-  const [user, setUser] = useState(() => {
-    return JSON.parse(localStorage.getItem("user")) || null;
-  });
+  const [user, setUser] = useState(null);
 
-  // second state--> JWT token sent by backend.
-  const [token, setToken] = useState(() => {
-    return localStorage.getItem("token") || "";
-  });
+  const [loading, setLoading] = useState(true);
 
   //true - if token not null
   // false if token is null
-  const isAuthenticated = !!token;
+  // const isAuthenticated = !!token;
 
-  const login = (userData, jwtToken) => {
-    //store in the state
-    setUser(userData);
-    setToken(jwtToken);
 
-    //storing it
-    console.log("user - ", userData);
-    console.log("token-", jwtToken);
 
-    localStorage.setItem("user", JSON.stringify(userData));
-    localStorage.setItem("token", jwtToken);
+  const loginUser = async (email, password) => {
+    try {
+      const res = await api.post("/login", {
+        email,
+        password,
+      });
+
+      console.log("-Frontend (loginUser()) : ", res.data);
+      console.log("jwt: ",res.data.jwt)
+      console.log("msg: ",res.data.msg)
+      console.log("user: ",res.data.user)
+
+      
+
+      localStorage.setItem("token", res.data.jwt);
+      setUser(res.data.user);
+      localStorage.setItem("user", JSON.stringify(res.data.user))
+      
+      console.log("user login successful");
+      return { success: true, message: res.data.msg, user: res.data.user };
+
+    } catch (err) {
+      console.log(
+        "Login attempt failed:", err.response?.data?.msg || err.msg);
+      return {
+        // err.response?.data?.msg ||
+        message: err.response?.data?.msg || "invalid credentials",
+        success: false,
+      };
+    }
   };
 
-  const logout = () => {
-    setUser(null);
-    setToken("");
-    console.log("bye");
+  const registerUser = async (name, email, password) => {
+    try {
+      const res = await api.post("/register", {
+        name,
+        email,
+        password,
+      });
 
-    localStorage.removeItem("user");
+       localStorage.setItem("token", res.data.jwt);
+       setUser(res.data.user);
+       localStorage.setItem("user", JSON.stringify(res.data.user));
+      return { success: true, message: res.data.msg ||" User Registration successful!" };
+    } catch (err) {
+      console.error(
+        "Registration failed:", err.response?.data?.msg || err.msg);
+      return {
+        success: false,
+        message: err.response?.data?.msg ,
+      };
+    }
+  };
+
+  const loadUser = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const res = await api.get("/user-details");
+      setUser(res.data.user);
+    } 
+    catch (err) {
+      localStorage.removeItem("token");
+    } 
+    finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(()=>{
+     loadUser();
+  },[])
+
+  const logoutUser = () => {
+    setUser(null);
+    // setToken("");
+    console.info("user , logged out ");
+
+    // localStorage.removeItem("user");
     localStorage.removeItem("token");
   };
+
+  
+  const isAuthenticated = !!user;
 
   return (
     //it provides the value - funcs globally to the children
     <AuthContext.Provider
-      value={{ isAuthenticated, login, logout, user, token }}
+      value={{
+        isAuthenticated,
+        loginUser,
+        logoutUser,
+        user,
+        registerUser,
+        loading,
+      }}
     >
       {children}
     </AuthContext.Provider>
   );
 };
-
 
 // authContext hook ---
 

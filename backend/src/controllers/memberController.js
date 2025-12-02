@@ -91,7 +91,7 @@ export async function handleGetMembers(req, res) {
   }
    catch (err) {
     console.error("Get Members Error:", err);
-    return res.status(500).json({ message: "Server error" });
+    return res.status(500).json({ msg: "Server error" });
   }
 }
 

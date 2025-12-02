@@ -7,12 +7,21 @@ import { useAuth } from "@/context/AuthContext";
 export default function ProtectedRoute({ children }) {
   // const {isAuthenticated} = useContext(AuthContext)
 
+  // const { isAuthenticated } = useAuth();
+  const { user, loading } = useAuth();
+ 
 
-  const { isAuthenticated } = useAuth();
+  if ( loading ) return (
+    <div style={{ padding: "20px", textAlign: "center" }}>
+      <h4>Loading...🔃</h4>
+    </div>
+  );
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+  //redirecting if the user is null ( logged out ) 
+  if (!user ) {
+    return <Navigate to="/login" />
   }
 
+  // rendering children == protected routes , if user is Logeed IN
   return children;
 }

@@ -6,13 +6,13 @@ export default function Sidebar() {
   const location = useLocation();
 
   const links = [
-    { name: "Dashboard", path: "/", icon: <Home size={18} /> },
+    { name: "Dashboard", path: "/dashboard", icon: <Home size={18} /> },
     { name: "Projects", path: "/projects", icon: <FolderKanban size={18} /> },
-    
+
     { name: "Profile", path: "/profile", icon: <User size={18} /> },
   ];
 
-  const {logout} = useAuth();
+  const { logoutUser } = useAuth();
 
 
     // defining side bar structure
@@ -40,7 +40,7 @@ export default function Sidebar() {
         ))}
 
         <button
-          onClick={logout}
+          onClick={logoutUser}
           className="flex items-center gap-2 p-2 rounded-md mt-4 text-red-500 hover:bg-red-100"
         >
           <LogOut size={18} /> Logout

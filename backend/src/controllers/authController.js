@@ -50,6 +50,7 @@ export  async function registerUser(req,res) {
         //creating jwt token 
         const token = generatetoken(user._id, email);
 
+        console.log("user registration successful, user: ",user)
         return res.json({msg: "User Registration successful!", 
             user: {
                 id: user._id,
@@ -84,13 +85,16 @@ export  async function loginUser(req,res) {
 
         //user.password = hashed pass
 
-        if (! bcrypt.compare(password, user.password)){
-            return res.status(401).json({msg:"incorrect password"})
+        const result =await bcrypt.compare(password, user.password)
+        
+        if (!result) {
+          return res.status(401).json({ msg: "incorrect password" });
         }
 
          //creating jwt token 
         const token = generatetoken(user._id, email);
 
+        console.log("user login successful, user:",user)
         return res.json({
             msg: "Login successful!",
             user:{
@@ -100,7 +104,6 @@ export  async function loginUser(req,res) {
             },
             jwt: token
         })
-
     }
     catch(err){
         console.error(err)
@@ -117,9 +120,7 @@ export  async function userDetails(req,res) {
         if (!user){
             return res.status(400).json({msg:"failed to get the user data"})
         }
-        
         return res.status(200).json({user})
-
     }
     catch(err){
          console.error(err)
