@@ -17,6 +17,12 @@ const projectSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
+    status: {
+      type: String,
+      enum: ["In Progress", "Completed"],
+      default:"In Progress"
+
+    },
     members: [
       {
         user: {

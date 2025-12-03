@@ -42,7 +42,7 @@ export function LoginForm({ className, ...props }) {
 
     if (res.success) {
       toast.success("User logged-In successfully !");
-      navigate("/dashboard"); //dash
+      navigate("/"); //dash
     } else {
       toast.error(res.message);
       console.log(res.message);

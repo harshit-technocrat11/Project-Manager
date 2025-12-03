@@ -97,12 +97,21 @@ export const AuthProvider = ({ children }) => {
   },[])
 
   const logoutUser = () => {
-    setUser(null);
-    // setToken("");
-    console.info("user , logged out ");
+    try{
 
-    // localStorage.removeItem("user");
-    localStorage.removeItem("token");
+      setUser(null);
+      // setToken("");
+      
+      // localStorage.removeItem("user");
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+
+      document.cookie = "token="
+      console.info("user , logged out ");
+    }
+      catch (err) {
+        console.error("Logout error:", err);
+    }
   };
 
   

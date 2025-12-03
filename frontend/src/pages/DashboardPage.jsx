@@ -14,16 +14,24 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { AddProjectModal } from "@/components/project/AddProjectModal";
+import { useAuth } from "@/context/AuthContext";
 
 
 export default function DashboardPage() {
+  const {user} = useAuth();
   return (
     <div className="space-y-8">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
 
-       <AddProjectModal/>
+        <AddProjectModal />
+      </div>
+
+      <div className="p-6">
+        <h2 className="text-2xl font-bold text-violet-600">
+          Welcome, {user?.name} 👋
+        </h2>
       </div>
 
       {/* stats card */}

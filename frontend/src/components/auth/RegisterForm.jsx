@@ -55,7 +55,7 @@ export function RegisterForm({ ...props }) {
 
     if (res.success) {
       toast.success("Account created! ");
-      navigate("/dashboard");
+      navigate("/");
 
       // form reset
       setName("");

@@ -1,4 +1,5 @@
 import Project from "../models/Project.js";
+import { Task } from "../models/Task.js";
 import { isOwner } from "./helpers/isOwner.js";
 
 // create
@@ -27,17 +28,26 @@ export async function handleCreateProject(req, res) {
 // get all 
 export async function handleGetAllProjects(req, res) {
   try {
-    // only the project users - members/owner can view the list 
 
+    // only the project users - members/owner can view the list 
     const projects =  await Project.find( {
      $or : [
         {owner: req.user.id } // current user
         , {"members.user": req.user.id}
       ]
-    })
+    }).lean()
     
+    // lean() - returns plain js obj
+    //attaching tasks - belonging to each project
+    for ( let p of projects){
+      const tasks = await Task.find({projectId: p._id}).lean()
+      p.tasks = tasks
+    }
 
-    res.status(200).json({ msg: "all projects are:-", projects: projects });
+    console.log("all projects : ", projects)
+    res
+      .status(200)
+      .json({ msg: "all projects are:-", projects: projects });
   } catch (err) {
     console.error("error fetching all projects ", err);
     return res.status(500).json({ msg: "internal server error" });

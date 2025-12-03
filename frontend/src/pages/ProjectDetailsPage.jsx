@@ -47,6 +47,10 @@ export default function ProjectDetailsPage({}) {
 
   const [Taskfilter, setfilter] = useState("all");
 
+  const [memberEmail, setMemberEmail] = useState("");
+  const [adding, setAdding] = useState(false);
+  
+  const handleAddMember = ()=>{}
   //today filter
   function isToday(task) {
     const date = new Date(task.dueDate);
@@ -103,6 +107,32 @@ const handleToggleStatus = (id) => {
           onAdd={(newtask) => setTasks((prev) => [...prev, newtask])}
         />
       </div>
+
+      {/* add member */}
+      <div className="mt-6">
+        <h2 className="text-lg font-bold mb-3">Members</h2>
+
+        <div className="flex gap-3">
+          <input
+            type="email"
+            placeholder="Enter member email"
+            value={memberEmail}
+            onChange={(e) => setMemberEmail(e.target.value)}
+            className="border px-3 py-2 rounded-lg w-full"
+          />
+
+          <button
+            onClick={handleAddMember}
+            disabled={adding}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+          >
+            {adding ? "Adding..." : "Add"}
+          </button>
+        </div>
+      </div>
+
+      {/* member list */}
+      
       {/* Filters */}
       <div className="flex gap-3">
         <Button onClick={() => setfilter("all")} variant="outline">
@@ -118,7 +148,7 @@ const handleToggleStatus = (id) => {
           Completed
         </Button>
       </div>
-      
+
       {/* Task Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredTasks.map((task) => (
@@ -131,7 +161,6 @@ const handleToggleStatus = (id) => {
           />
         ))}
       </div>
-     
     </div>
   );
 }

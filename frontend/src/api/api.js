@@ -6,7 +6,7 @@ export const api = axios.create({
     withCredentials: true, 
 })
 
-// jwt from localstorage
+// jwt from localstorage / middleware
 api.interceptors.request.use((config)=>{
     const token = localStorage.getItem("token");
 
@@ -14,5 +14,17 @@ api.interceptors.request.use((config)=>{
       config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
-})
+  },
+
+  //autologut --> token expired
+  (err)=>{
+    if ( err.response && err.response.status === 401){
+
+      localStorage.removeItem("token")
+      localStorage.removeItem("user")
+      window.location.href="/login"
+    }
+    return Promise.reject(err)
+  }
+)
 
