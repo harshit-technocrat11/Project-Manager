@@ -59,7 +59,7 @@ export async function handleDeleteProject(req, res) {
   try {
     const projectId = req.params.projectId;
 
-    const project = await Project.findById(projectId);
+    var project = await Project.findById(projectId);
     if (!isOwner(project, req.user.id)) {
       return res
         .status(403)
@@ -91,7 +91,7 @@ export async function handleUpdateProject(req, res) {
 
     const { title, description } = req.body;
 
-    const project = await Project.findById(projectId)
+    var project = await Project.findById(projectId)
     if ( !isOwner(project, req.user.id)){
       return res.status(403).json({ msg: "unauthorized access , only project Owner can update projects" });
     }
@@ -99,7 +99,7 @@ export async function handleUpdateProject(req, res) {
     project = await Project.findOneAndUpdate(
       { _id: projectId, owner: req.user.id }, //filter
       { title, description }, //updated val
-      { new: true }
+      { new: true } 
     );
 
     if (!project) {
@@ -107,6 +107,8 @@ export async function handleUpdateProject(req, res) {
         .status(404)
         .json({ msg: "Project not found" });
     }
+
+    res.status(200).json({msg: "project updated succesfully !!", project: project})
 
   } catch (err) {
     console.error("Update Project Error:", err);

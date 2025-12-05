@@ -1,66 +1,94 @@
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+
 import ProjectCard from "@/components/project/ProjectCard";
 import { AddProjectModal } from "@/components/project/AddProjectModal";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search } from "lucide-react";
+import { CarTaxiFront, Search } from "lucide-react";
 import { api } from "@/api/api";
+import { toast } from "sonner";
+
 
 export default function ProjectsPage() {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
 
-  const [projects, setProjects] = useState([
-    // {
-    //   id: 123,
-    //   title: "Website Redesign",
-    //   description: "Update UI and improve performance",
-    //   tasks: 10,
-    //   status: "Completed",
-    //   createdAt: "2025-01-15",
-    // },
-    // {
-    //   id: 12314,
-    //   title: "AI Chatbot Integration",
-    //   description: "Build an AI chatbot for customer support",
-    //   status: "In Progress",
-    //   tasks: 10,
-    //   createdAt: "2025-01-20",
-    // },
-    
-  ]);
-  const handleAddProject = (project) => {
-    setProjects((prev) => [...prev, project]);
-  };
-  const handleDeleteProject = (id) => {
-    setProjects((prev) => prev.filter((p) => p.id !== id));
-  };
-
+  const [projects, setProjects] = useState([]);
 
   const filteredProjects =  projects.filter ((p)=>
     p.title?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     p.description?.toLowerCase().includes(searchQuery.toLowerCase())
   )
 
-  useEffect(() => {
-    fetchProjects();
-  }, []);
-
+  
   const fetchProjects = async () => {
-      try {
-        const res =  await api.get("/projects");
-
-        console.log("projects fetched are: ", res.data.projects || [])
-        setProjects(res.data.projects || []);
-        
-      }
-      catch(err) {
-          console.error("error while , fetching projects :", err)
-      }
+    try {
+      const res =  await api.get("/projects");
+      
+      console.log("projects fetched are: ", res.data.projects || [])
+      setProjects(res.data.projects || []);
+      
+    }
+    catch(err) {
+      console.error("error while , fetching projects :", err)
+    }
     
   }
 
+  const createProject = async (title, description) =>{
+    try {
+      const res  = await api.post("/projects", {title:title, description: description} )
+      
+      console.log("Project Created!", res.data?.msg)
+      toast.message("New Project Created!")
+      setProjects((prev)=> [...prev, res.data?.project])
+    }
+    catch(err) {
+      console.log("error while , creating project :", err);
+      toast.error("error occured")
+    }
+  }
+
+  const handleUpdateProject= async ( updatedProject) =>{
+    try {
+      const res = await api.patch(`/projects/${updatedProject._id}`, {
+        title: updatedProject.title,
+        description: updatedProject.description,
+      });
+      console.log( "updated project:", res.data?.project)
+
+      setProjects((prev)=>prev.map((proj)=>( proj._id === updatedProject._id)? res.data?.project : proj ))
+
+      console.log("project Updated!", res.data?.msg);
+      toast.message("Project updated succesfully !");
+    }
+
+    catch ( err) {
+       console.log("error while , updating project :", err);
+       toast.error("error occured");
+    }
+  }
+
+  const handleDeleteProject = async (projectId) => {
+    try {
+      const res = await api.delete(`/projects/${projectId}`);
+      console.log("deleted project:", res.data?.msg);
+
+      setProjects((prev) =>
+        prev.filter((proj) =>
+          proj._id !== projectId
+        )
+      );
+      console.log("project Deleted successfully!", res.data?.msg);
+      toast.message("Project Deleted succesfully !");
+    } catch (err) {
+      console.log("error while , deleting project :", err);
+      toast.error("error occured");
+    }
+  };
+  useEffect(() => {
+    fetchProjects();
+    
+  }, []);
   
   return (
     <div className="space-y-8">
@@ -80,21 +108,20 @@ export default function ProjectsPage() {
           />
         </div>
 
-        {/* <Button>
-          <Plus className="mr-2 h-4 w-4" /> New Project
-        </Button> */}
+        {/* project modal */}
         <AddProjectModal
-          onAdd={(newProject) => setProjects((prev) => [...prev, newProject])}
+          onAdd={(proj) => createProject(proj.title, proj.description)}
         />
       </div>
       {/* Projects Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredProjects?.map((project) => (
           <ProjectCard
-            key={project.id}
+            key={project._id}
             project={project}
-            onClick={() => navigate(`/projects/:${project._id}`)}
+            onClick={() => navigate(`/projects/${project._id}`)}
             onDelete={() => handleDeleteProject(project._id)}
+            onEdit={handleUpdateProject}
           />
         ))}
       </div>

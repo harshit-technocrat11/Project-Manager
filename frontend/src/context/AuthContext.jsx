@@ -17,7 +17,6 @@ export const AuthProvider = ({ children }) => {
   // const isAuthenticated = !!token;
 
 
-
   const loginUser = async (email, password) => {
     try {
       const res = await api.post("/login", {

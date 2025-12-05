@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Card,
   CardHeader,
@@ -14,28 +15,27 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-
+import { Delete, Pencil, EllipsisVertical } from "lucide-react";
 import ProgressBar from "./ProgressBar";
-import { EllipsisVertical } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import EditProjectModal from "./EditProjectModal";
 
-export default function ProjectCard({ project, onDelete, onClick }) {
-  const navigate = useNavigate();
+export default function ProjectCard({ project, onDelete, onClick, onEdit }) {
+  const [editOpen, setEditOpen] = useState(false);
 
-  
   const tasks = project?.tasks || [];
-  console.log(project)
   const total = tasks.length;
   const completed = tasks.filter((t) => t?.status === "completed").length;
-
   const progress = total === 0 ? 0 : Math.round((completed / total) * 100);
 
   return (
     <Card
-      onClick={onClick}
+      onClick={(e)=> {
+        if ( editOpen){ return};
+        onClick();
+      }}
       className="relative border rounded-xl p-5 shadow-sm hover:shadow-md transition-all cursor-pointer"
     >
-      {/* Three-dot menu */}
+      
       <div className="absolute top-4 right-4 z-20">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -44,41 +44,58 @@ export default function ProjectCard({ project, onDelete, onClick }) {
             </Button>
           </DropdownMenuTrigger>
 
-          <DropdownMenuContent align="end">
+          <DropdownMenuContent align="end" >
             <DropdownMenuSeparator />
+
             <DropdownMenuItem
               onClick={(e) => {
-                e.stopPropagation(); // avoid triggering card click
+                e.stopPropagation();
+                setEditOpen(true);
+              }}
+            >
+              <div className="flex items-center gap-2">
+                <Pencil size={16} />
+                Edit
+              </div>
+            </DropdownMenuItem>
+
+            
+            <DropdownMenuItem
+              onClick={(e) => {
+                e.stopPropagation();
+                
                 onDelete(project._id);
               }}
             >
-              ❌ Delete
+              <div className="flex items-center gap-2 text-red-600">
+                <Delete size={16} />
+                Delete
+              </div>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      {/* Card Content */}
+      <EditProjectModal
+        open={editOpen}
+        setOpen={setEditOpen}
+        project={project}
+        onUpdate={onEdit}
+      />
+
       <CardHeader className="pb-2">
         <CardTitle className="text-xl font-semibold">{project.title}</CardTitle>
-
         <p className="text-sm text-gray-600">{project.description}</p>
-
         <p className="text-xs text-muted-foreground mt-1">
           Created on: {new Date(project.createdAt).toLocaleDateString()}
         </p>
       </CardHeader>
 
       <CardContent className="space-y-4 pt-2">
-        {/* Task Info */}
-        <div>
-          <p className="text-sm font-medium">
-            {completed}/{total} tasks completed
-          </p>
-
-          {/* Progress Bar (you import it) */}
-          <ProgressBar progress={progress} />
-        </div>
+        <p className="text-sm font-medium">
+          {completed}/{total} tasks completed
+        </p>
+        <ProgressBar progress={progress} />
       </CardContent>
 
       <CardFooter className="pt-1">

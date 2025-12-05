@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+
 import TaskCard from "@/components/task/TaskCard";
 import { AddTaskModal } from "@/components/task/AddTaskModal";
 

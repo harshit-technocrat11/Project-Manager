@@ -1,15 +1,13 @@
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { Badge, Plus } from "lucide-react";
+
+import { Badge } from "lucide-react";
 
 import { FolderKanban, CheckCircle, Clock, Flame ,CheckSquare} from "lucide-react";
 
 import {
   Card,
-  CardAction,
   CardContent,
-  CardDescription,
-  CardFooter,
+
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -24,7 +22,6 @@ export default function DashboardPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-
         <AddProjectModal />
       </div>
 
