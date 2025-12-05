@@ -115,7 +115,10 @@ export default function ProjectsPage() {
       </div>
       {/* Projects Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredProjects?.map((project) => (
+        {filteredProjects?.length === 0 ? (
+          <h4 className="flex justify-center text-xl text-zinc-700 font-medium">No currently exisiting Projects found⚠️</h4>
+        ) : null}
+        { filteredProjects?.map((project) => (
           <ProjectCard
             key={project._id}
             project={project}

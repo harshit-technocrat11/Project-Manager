@@ -1,11 +1,10 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,10 +18,15 @@ import {
 } from "@/components/ui/select";
 import { toast } from "sonner";
 
-export default function AddTaskModal({ members = [], onAdd }) {
+export default function EditTaskModal({
+  open,
+  setOpen,
+  task,
+  members = [],
+  onUpdate,
+}) {
   const getToday = () => new Date().toISOString().slice(0, 10);
 
-  const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [taskDesc, setTaskDesc] = useState("");
   const [priority, setPriority] = useState("medium");
@@ -30,48 +34,53 @@ export default function AddTaskModal({ members = [], onAdd }) {
   const [status, setStatus] = useState("pending");
   const [assignedTo, setAssignedTo] = useState("none");
 
-  const handleAddTask = () => {
-    if (title.trim().length < 3) {
-      toast.error("Title must be at least 3 characters");
+  useEffect(() => {
+    if (task) {
+      setTitle(task.title || "");
+      setTaskDesc(task.description || "");
+      setPriority(task.priority || "medium");
+      setDueDate(task.dueDate || getToday());
+      setStatus(task.status || "pending");
+      setAssignedTo(task.assignedTo || "none");
+    }
+  }, [task]);
+
+  if (!task) return null;
+
+  const handleUpdateTask = () => {
+    if (!title.trim() || title.trim().length < 3) {
+      toast.error("Title must be at least 3 characters.");
       return;
     }
-    if (taskDesc.length > 1000) toast.error("Description too long");
+    if (taskDesc.length > 1000) {
+      toast.error("Description is too long!");
+      return;
+    }
     if (dueDate && dueDate < getToday()) {
-      toast.error("Due date cannot be in the past");
+      toast.error("Due date cannot be in the past.");
       return;
     }
 
-    const newTask = {
-      id: crypto ? crypto.randomUUID() : Date.now().toString(),
+    const updatedTask = {
+      ...task,
       title: title.trim(),
-      priority,
       description: taskDesc,
-      dueDate: dueDate || null,
+      priority,
+      dueDate,
       status,
       assignedTo: assignedTo === "none" ? null : assignedTo,
     };
 
-    onAdd(newTask);
-    toast.success("Task created");
-    // reset local form
-    setTitle("");
-    setTaskDesc("");
-    setPriority("medium");
-    setDueDate(getToday());
-    setStatus("pending");
-    setAssignedTo("none");
+    onUpdate(updatedTask);
+    toast.success("Task updated!");
     setOpen(false);
   };
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button>Add Task</Button>
-      </DialogTrigger>
-
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>Add New Task</DialogTitle>
+          <DialogTitle>Edit Task</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
@@ -90,7 +99,7 @@ export default function AddTaskModal({ members = [], onAdd }) {
             <label className="text-sm">Priority</label>
             <Select value={priority} onValueChange={(v) => setPriority(v)}>
               <SelectTrigger>
-                <SelectValue placeholder="Select priority" />
+                <SelectValue placeholder="Priority" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="low">Low</SelectItem>
@@ -101,7 +110,20 @@ export default function AddTaskModal({ members = [], onAdd }) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm">Due Date (optional)</label>
+            <label className="text-sm">Status</label>
+            <Select value={status} onValueChange={(v) => setStatus(v)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="completed">Completed</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm">Due Date</label>
             <Input
               type="date"
               value={dueDate}
@@ -110,10 +132,13 @@ export default function AddTaskModal({ members = [], onAdd }) {
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm">Assign to (optional)</label>
-            <Select value={assignedTo} onValueChange={(v) => setAssignedTo(v)}>
+            <label className="text-sm">Assign To</label>
+            <Select
+              value={assignedTo ?? "none"}
+              onValueChange={(v) => setAssignedTo(v)}
+            >
               <SelectTrigger>
-                <SelectValue placeholder="Assign to (optional)" />
+                <SelectValue placeholder="Assign to" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">None</SelectItem>
@@ -131,7 +156,7 @@ export default function AddTaskModal({ members = [], onAdd }) {
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleAddTask}>Create</Button>
+          <Button onClick={handleUpdateTask}>Save Changes</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
