@@ -47,4 +47,15 @@ const projectSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+projectSchema.virtual("tasks", {
+  ref: "Task",
+  localField: "_id",
+  foreignField: "project",
+});
+
+//auto .populate("tasks") 
+projectSchema.set("toObject", { virtuals: true });
+projectSchema.set("toJSON", { virtuals: true });
+
+
 export default mongoose.model("Project", projectSchema)

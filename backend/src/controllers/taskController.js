@@ -5,9 +5,16 @@ import { isProjectMember } from "./helpers/isProjectMember.js";
 
 // create
 export async function createTask(req, res) {
-  try {
+  try { 
     const { title, description, dueDate, priority, assignedTo } = req.body;
     const projectId = req.params.projectId;
+    console.log("projectId:", projectId)
+
+    // console.log(title)
+    // console.log(description)
+    // console.log(dueDate)
+    // console.log(priority)
+    // console.log(assignedTo)
 
     if (!title ) {
       return res
@@ -100,11 +107,23 @@ export async function editTask(req, res) {
       }
     }
 
+    console.log("update: ", req.body);
     const updatedTask = await Task.findByIdAndUpdate(
       taskId,
       { $set: req.body },
       { new: true }
     );
+
+    // updating completion status of project / wrt to tasks completed 
+    const projectId = updatedTask.project;
+
+    const allTasks = await Task.find({ project:projectId });
+
+    const allCompleted = allTasks.every((t) => t.status === "completed");
+
+    await Project.findByIdAndUpdate(projectId, {
+      status: allCompleted ? "Completed" : "In Progress",
+    });
 
     return res.status(200).json({
       message: "Task updated",
@@ -146,34 +165,39 @@ export async function deleteTask(req, res) {
 export async function getTasks(req, res) {
   try {
     const projectId = req.params.projectId;
-    const project = await Project.findById(projectId)
+    const currentUserId = req.user.id;
 
-    const currentUserId = req.user.id
+    console.log("inside getTasks, current userid ", currentUserId);
+
+   
+    const project = await Project.findById(projectId)
+      .populate("tasks") //  virtual populate
+
 
     if (!project) {
       return res.status(404).json({ msg: "Project not found." });
     }
 
-    console.log("inside getTasks, current userid ",currentUserId)
-
-    // authorization check  
-    if ( ! (isOwner(project, currentUserId) || isProjectMember(project, currentUserId)) )
-    {
+    // authorization
+    if (
+      !(
+        isOwner(project, currentUserId) ||
+        isProjectMember(project, currentUserId)
+      )
+    ) {
       return res
         .status(403)
-        .json({ msg: "Access denied. You are not a member of this project." });
+        .json({ msg: "Access denied. Not a project member." });
     }
 
-    const tasks = await Task.find({ project: projectId });
-    console.log("tasks: ", tasks)
-
-    if ( !tasks){
-      res.status(404).json({msg:"No tasks created yet"})
-    }
-
-    return res.status(200).json({ msg: "tasks list", projectId: projectId, project:project, tasks: tasks  }); 
-  } 
-  catch (err) {
+    return res.status(200).json({
+      msg: "Task list retrieved",
+      projectId,
+      project,
+      members:project.members,
+      tasks: project.tasks, 
+    });
+  } catch (err) {
     console.error("cannot fetch all tasks :", err);
     return res.status(500).json({ msg: "Server error" });
   }

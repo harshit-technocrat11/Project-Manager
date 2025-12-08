@@ -68,11 +68,11 @@ export default function EditTaskModal({
       priority,
       dueDate,
       status,
-      assignedTo: assignedTo === "none" ? null : assignedTo,
+      assignedTo: assignedTo==="none" ? null : assignedTo,
     };
 
     onUpdate(updatedTask);
-    toast.success("Task updated!");
+   
     setOpen(false);
   };
 
@@ -143,8 +143,8 @@ export default function EditTaskModal({
               <SelectContent>
                 <SelectItem value="none">None</SelectItem>
                 {members.map((m) => (
-                  <SelectItem key={m.user._id} value={m.user._id}>
-                    {m.user.email}
+                  <SelectItem key={m.user} value={m.user}>
+                    {m.email}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -23,6 +23,8 @@ export default function ProjectCard({ project, onDelete, onClick, onEdit }) {
   const [editOpen, setEditOpen] = useState(false);
 
   const tasks = project?.tasks || [];
+  
+  console.log("tasks: ", project.tasks)
   const total = tasks.length;
   const completed = tasks.filter((t) => t?.status === "completed").length;
   const progress = total === 0 ? 0 : Math.round((completed / total) * 100);

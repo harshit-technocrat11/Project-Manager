@@ -26,7 +26,7 @@ export default function TaskCard({
     pending: "bg-blue-800 text-white",
   };
 
-  const assignedUser = members.find((m) => m.user._id === task.assignedTo);
+  const assignedUser = members.find((m) => m.user === task.assignedTo);
 
   return (
     <div
@@ -46,7 +46,7 @@ export default function TaskCard({
         ) : null}
 
         <div className="flex gap-4 text-sm text-muted-foreground items-center">
-          {task.dueDate && <p>📅 {task.dueDate}</p>}
+          {task.dueDate && <p>📅 {task.dueDate.split('T')[0]}</p>}
           <p className="text-black">
             Status:{" "}
             <Badge
@@ -62,7 +62,7 @@ export default function TaskCard({
         <div className="text-sm mt-2">
           <strong>Assigned to: </strong>
           <span className="font-medium">
-            {assignedUser ? assignedUser.user.email : "None"}
+            {assignedUser ? assignedUser.email : "None"}
           </span>
         </div>
       </div>
@@ -88,7 +88,7 @@ export default function TaskCard({
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation();
-                toggleComplete?.(task.id);
+                toggleComplete?.(task._id);
               }}
             >
               {task.status === "pending"
@@ -98,7 +98,7 @@ export default function TaskCard({
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation();
-                onDelete?.(task.id);
+                onDelete?.(task._id);
               }}
             >
               Delete❌

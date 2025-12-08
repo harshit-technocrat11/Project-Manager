@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, createContext } from "react";
 import { Button } from "@/components/ui/button";
 import TaskCard from "@/components/task/TaskCard";
 import AddTaskModal from "@/components/task/AddTaskModal";
@@ -10,7 +10,6 @@ import { toast } from "sonner";
 
 export default function ProjectDetailsPage() {
   const { projectId } = useParams();
-  console.log("projectId:", projectId)
 
   const currentUserId = JSON.parse(localStorage.getItem("user"))?._id;
 
@@ -25,9 +24,8 @@ export default function ProjectDetailsPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
 
-  // -----------------------------------------
-  //  FETCH PROJECT DETAILS FROM BACKEND
-  // -----------------------------------------
+  
+
   useEffect(() => {
     fetchProjectDetails();
   }, []);
@@ -40,6 +38,9 @@ export default function ProjectDetailsPage() {
       setProject(res.data.project);
       setTasks(res.data.tasks);
       setMembers(res.data.project.members);
+      console.log(members)
+
+      console.log("members:", res.data.project.members)
 
       console.log("Loaded:", res.data);
     } catch (err) {
@@ -48,9 +49,6 @@ export default function ProjectDetailsPage() {
     }
   };
 
-  // -----------------------------------------
-  //      ADD MEMBER TO BACKEND
-  // -----------------------------------------
   const handleAddMember = async () => {
     if (!memberEmail.includes("@")) {
       toast.error("Invalid email");
@@ -58,7 +56,7 @@ export default function ProjectDetailsPage() {
     }
     setAdding(true);
     try {
-      const res = await api.post(`/projects/${projectId}/add-member`, {
+      const res = await api.post(`/members/${projectId}/add`, {
         email: memberEmail,
       });
 
@@ -73,15 +71,14 @@ export default function ProjectDetailsPage() {
     setAdding(false);
   };
 
-  // -----------------------------------------
-  //       CREATE TASK (BACKEND)
-  // -----------------------------------------
   const handleAddTask = async (newTask) => {
     try {
-      const res = await api.post(`/projects/${projectId}/tasks`, newTask);
+      console.log("handleAddTask:: ", newTask);
+      const res = await api.post(`/tasks/${projectId}`, newTask);
 
       setTasks((prev) => [...prev, res.data.task]);
 
+      console.log(res.data?.msg)
       toast.success("Task created");
     } catch (err) {
       console.error(err);
@@ -89,16 +86,20 @@ export default function ProjectDetailsPage() {
     }
   };
 
-  // -----------------------------------------
-  //       UPDATE TASK (BACKEND)
-  // -----------------------------------------
   const handleUpdateTask = async (updated) => {
     try {
-      const res = await api.patch(`/tasks/${updated.id}`, updated);
+      const res = await api.patch(`/tasks/edit/${updated._id}`, updated);
 
-      setTasks((prev) =>
-        prev.map((t) => (t.id === updated.id ? res.data.task : t))
-      );
+     
+    const updatedTask = res.data.task;
+
+   
+    setTasks((prev) => prev.map((t) => (t._id === id ? updatedTask : t)));
+
+      // updating project status / ac to progress
+    setProject((prev) =>
+      prev ? { ...prev, status: res.data.projectStatus } : prev
+    );
 
       toast.success("Task updated");
     } catch (err) {
@@ -107,14 +108,12 @@ export default function ProjectDetailsPage() {
     }
   };
 
-  // -----------------------------------------
-  //     DELETE TASK (BACKEND)
-  // -----------------------------------------
+ 
   const handleDelete = async (id) => {
     try {
-      await api.delete(`/tasks/${id}`);
+      await api.delete(`/tasks/delete/${id}`);
 
-      setTasks((prev) => prev.filter((t) => t.id !== id));
+      setTasks((prev) => prev.filter((t) => t._id !== id));
       toast.success("Task deleted");
     } catch (err) {
       console.error(err);
@@ -122,28 +121,35 @@ export default function ProjectDetailsPage() {
     }
   };
 
-  // -----------------------------------------
-  //   TOGGLE COMPLETE (BACKEND UPDATE)
-  // -----------------------------------------
+
   const handleToggleStatus = async (id) => {
-    const existing = tasks.find((t) => t.id === id);
-    const newStatus = existing.status === "pending" ? "completed" : "pending";
+    const existing = tasks.find((t) => t._id === id);
+
+    console.log("existing: ",existing)
+    if (!existing) return;
+
+    const updated = {
+      ...existing,
+      status: existing.status === "pending" ? "completed" : "pending",
+    };
 
     try {
-      const res = await api.patch(`/tasks/${id}`, { status: newStatus });
+      // update backend
+      const res = await api.patch(`/tasks/edit/${id}`, {
+        status: updated.status,
+      });
 
-      setTasks((prev) =>
-        prev.map((t) => (t.id === id ? res.data.task : t))
-      );
+      // update frontend
+      setTasks((prev) => prev.map((t) => (t._id === id ? res.data.task : t)));
+
+      toast.success("Status Updated");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to change status");
+      toast.error("Failed to toggle status");
     }
   };
 
-  // -----------------------------------------
-  //             FILTER LOGIC
-  // -----------------------------------------
+
   const isToday = (task) => {
     if (!task?.dueDate) return false;
     const d = new Date(task.dueDate);
@@ -221,8 +227,8 @@ export default function ProjectDetailsPage() {
 
         <div className="flex gap-3 mt-3">
           {members.map((m) => (
-            <div key={m.user._id} className="px-3 py-1 border rounded-full text-sm">
-              {m.user.email}
+            <div key={m._id} className="px-3 py-1 border rounded-full text-sm">
+              {m.email}
             </div>
           ))}
         </div>
@@ -251,7 +257,7 @@ export default function ProjectDetailsPage() {
 
         {filteredTasks.map((task) => (
           <TaskCard
-            key={task.id}
+            key={task._id}
             task={task}
             members={members}
             currentUserId={currentUserId}

@@ -35,12 +35,12 @@ export async function handleGetAllProjects(req, res) {
         {owner: req.user.id } // current user
         , {"members.user": req.user.id}
       ]
-    }).lean()
+    }).populate("tasks").lean()
     
     // lean() - returns plain js obj
     //attaching tasks - belonging to each project
     for ( let p of projects){
-      const tasks = await Task.find({projectId: p._id}).lean()
+      const tasks = await Task.find({project: p._id}).lean()
       p.tasks = tasks
     }
 

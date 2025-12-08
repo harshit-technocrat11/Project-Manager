@@ -20,7 +20,7 @@ import {
 import { toast } from "sonner";
 
 export default function AddTaskModal({ members = [], onAdd }) {
-  const getToday = () => new Date().toISOString().slice(0, 10);
+  const getToday = () => new Date().toLocaleDateString();
 
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
@@ -42,14 +42,17 @@ export default function AddTaskModal({ members = [], onAdd }) {
     }
 
     const newTask = {
-      id: crypto ? crypto.randomUUID() : Date.now().toString(),
+      
       title: title.trim(),
-      priority,
+      priority:priority,
       description: taskDesc,
       dueDate: dueDate || null,
       status,
       assignedTo: assignedTo === "none" ? null : assignedTo,
+
     };
+
+    console.log("new task :", newTask)
 
     onAdd(newTask);
     toast.success("Task created");
