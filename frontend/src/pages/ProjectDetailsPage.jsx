@@ -1,90 +1,163 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-
 import TaskCard from "@/components/task/TaskCard";
 import AddTaskModal from "@/components/task/AddTaskModal";
 import EditTaskModal from "@/components/task/EditTaskModal";
 
+import { api } from "@/api/api";
+import { useParams } from "react-router-dom";
+import { toast } from "sonner";
 
 export default function ProjectDetailsPage() {
+  const { projectId } = useParams();
+  console.log("projectId:", projectId)
 
-  const currentUserId = "user-100";
+  const currentUserId = JSON.parse(localStorage.getItem("user"))?._id;
 
-  const [tasks, setTasks] = useState([
-    {
-      id: "1",
-      title: "Design APIs",
-      description: "use express here",
-      priority: "high",
-      status: "pending",
-      dueDate: new Date().toISOString().slice(0, 10),
-      assignedTo: null,
-    },
-    {
-      id: "23",
-      title: "Build register UI",
-      description: "use reactjs",
-      priority: "medium",
-      status: "completed",
-      dueDate: "2025-11-20",
-      assignedTo: "user-200",
-    },
-    {
-      id: "3",
-      title: "Build register UI",
-      priority: "low",
-      status: "completed",
-      dueDate: "2025-11-20",
-      assignedTo: null,
-    },
-    {
-      id: "222",
-      title: "Build register UI",
-      priority: "medium",
-      status: "pending",
-      dueDate: "2025-11-21",
-      assignedTo: "user-200",
-    },
-    {
-      id: "22",
-      title: "refine frontend !!",
-      priority: "medium",
-      status: "pending",
-      dueDate: "2025-11-20",
-      assignedTo: currentUserId,
-    },
-  ]);
-
-  const [members, setMembers] = useState([
-    { user: { _id: "user-100", email: "me@example.com", name: "Me" } },
-    { user: { _id: "user-200", email: "alice@example.com", name: "Alice" } },
-  ]);
+  const [tasks, setTasks] = useState([]);
+  const [members, setMembers] = useState([]);
+  const [project, setProject] = useState(null);
 
   const [Taskfilter, setfilter] = useState("all");
   const [memberEmail, setMemberEmail] = useState("");
   const [adding, setAdding] = useState(false);
 
-  // edit modal control
   const [editOpen, setEditOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
 
-  // helper: is task due today
-  function isToday(task) {
+  // -----------------------------------------
+  //  FETCH PROJECT DETAILS FROM BACKEND
+  // -----------------------------------------
+  useEffect(() => {
+    fetchProjectDetails();
+  }, []);
+
+  const fetchProjectDetails = async () => {
+    try {
+      
+      const res = await api.get(`/tasks/${projectId}`);
+
+      setProject(res.data.project);
+      setTasks(res.data.tasks);
+      setMembers(res.data.project.members);
+
+      console.log("Loaded:", res.data);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to load project details");
+    }
+  };
+
+  // -----------------------------------------
+  //      ADD MEMBER TO BACKEND
+  // -----------------------------------------
+  const handleAddMember = async () => {
+    if (!memberEmail.includes("@")) {
+      toast.error("Invalid email");
+      return;
+    }
+    setAdding(true);
+    try {
+      const res = await api.post(`/projects/${projectId}/add-member`, {
+        email: memberEmail,
+      });
+
+      toast.success("Member added!");
+
+      setMembers(res.data.members);
+      setMemberEmail("");
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.msg || "Failed to add member");
+    }
+    setAdding(false);
+  };
+
+  // -----------------------------------------
+  //       CREATE TASK (BACKEND)
+  // -----------------------------------------
+  const handleAddTask = async (newTask) => {
+    try {
+      const res = await api.post(`/projects/${projectId}/tasks`, newTask);
+
+      setTasks((prev) => [...prev, res.data.task]);
+
+      toast.success("Task created");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to create task");
+    }
+  };
+
+  // -----------------------------------------
+  //       UPDATE TASK (BACKEND)
+  // -----------------------------------------
+  const handleUpdateTask = async (updated) => {
+    try {
+      const res = await api.patch(`/tasks/${updated.id}`, updated);
+
+      setTasks((prev) =>
+        prev.map((t) => (t.id === updated.id ? res.data.task : t))
+      );
+
+      toast.success("Task updated");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to update");
+    }
+  };
+
+  // -----------------------------------------
+  //     DELETE TASK (BACKEND)
+  // -----------------------------------------
+  const handleDelete = async (id) => {
+    try {
+      await api.delete(`/tasks/${id}`);
+
+      setTasks((prev) => prev.filter((t) => t.id !== id));
+      toast.success("Task deleted");
+    } catch (err) {
+      console.error(err);
+      toast.error("Delete failed");
+    }
+  };
+
+  // -----------------------------------------
+  //   TOGGLE COMPLETE (BACKEND UPDATE)
+  // -----------------------------------------
+  const handleToggleStatus = async (id) => {
+    const existing = tasks.find((t) => t.id === id);
+    const newStatus = existing.status === "pending" ? "completed" : "pending";
+
+    try {
+      const res = await api.patch(`/tasks/${id}`, { status: newStatus });
+
+      setTasks((prev) =>
+        prev.map((t) => (t.id === id ? res.data.task : t))
+      );
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to change status");
+    }
+  };
+
+  // -----------------------------------------
+  //             FILTER LOGIC
+  // -----------------------------------------
+  const isToday = (task) => {
     if (!task?.dueDate) return false;
-    const date = new Date(task.dueDate);
-    const today = new Date();
+    const d = new Date(task.dueDate);
+    const t = new Date();
     return (
-      date.getDate() === today.getDate() &&
-      date.getMonth() === today.getMonth() &&
-      date.getFullYear() === today.getFullYear()
+      d.getDate() === t.getDate() &&
+      d.getMonth() === t.getMonth() &&
+      d.getFullYear() === t.getFullYear()
     );
-  }
+  };
 
   const filteredTasks = useMemo(() => {
     return tasks.filter((task) => {
       switch (Taskfilter) {
-        case "all":
-          return true;
         case "pending":
           return task.status === "pending";
         case "completed":
@@ -101,67 +174,8 @@ export default function ProjectDetailsPage() {
           return true;
       }
     });
-  }, [tasks, Taskfilter, currentUserId]);
+  }, [tasks, Taskfilter]);
 
-  // Add member (UI-only here) - replace with backend call if needed
-  const handleAddMember = () => {
-    if (!memberEmail || !memberEmail.includes("@")) {
-      return alert("Enter a valid email");
-    }
-    setAdding(true);
-    setTimeout(() => {
-      const newId = crypto ? crypto.randomUUID() : `user-${Date.now()}`;
-      setMembers((prev) => [
-        ...prev,
-        {
-          user: {
-            _id: newId,
-            email: memberEmail,
-            name: memberEmail.split("@")[0],
-          },
-        },
-      ]);
-      setMemberEmail("");
-      setAdding(false);
-    }, 400);
-  };
-
-  // Add Task (called by AddTaskModal)
-  const handleAddTask = (newtask) => {
-    // if you want to POST to backend, do it here and use server response
-    // const res = await api.post('/tasks', {...newtask, projectId})
-    setTasks((prev) => [
-      ...prev,
-      {
-        ...newtask,
-        id:
-          newtask.id || (crypto ? crypto.randomUUID() : Date.now().toString()),
-      },
-    ]);
-  };
-
-  // Update Task (called by EditTaskModal -> which calls onUpdate)
-  const handleUpdateTask = (updated) => {
-    // call backend PATCH here if desired, then update local state
-    setTasks((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
-  };
-
-  // Delete
-  const handleDelete = (id) =>
-    setTasks((prev) => prev.filter((t) => t.id !== id));
-
-  // Toggle complete
-  const handleToggleStatus = (id) => {
-    setTasks((prev) =>
-      prev.map((t) =>
-        t.id === id
-          ? { ...t, status: t.status === "pending" ? "completed" : "pending" }
-          : t
-      )
-    );
-  };
-
-  // open edit
   const openEdit = (task) => {
     setSelectedTask(task);
     setEditOpen(true);
@@ -169,11 +183,16 @@ export default function ProjectDetailsPage() {
 
   return (
     <div className="space-y-8">
+
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Project Name</h1>
-          <p className="text-muted-foreground">Short project description...</p>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {project?.title || "Project Name"}
+          </h1>
+          <p className="text-muted-foreground">
+            {project?.description || "Short project description..."}
+          </p>
         </div>
 
         <AddTaskModal members={members} onAdd={handleAddTask} />
@@ -182,6 +201,7 @@ export default function ProjectDetailsPage() {
       {/* Members */}
       <div className="mt-6">
         <h2 className="text-lg font-bold mb-3">Members</h2>
+
         <div className="flex gap-3">
           <input
             type="email"
@@ -198,12 +218,10 @@ export default function ProjectDetailsPage() {
             {adding ? "Adding..." : "Add"}
           </button>
         </div>
+
         <div className="flex gap-3 mt-3">
           {members.map((m) => (
-            <div
-              key={m.user._id}
-              className="px-3 py-1 border rounded-full text-sm"
-            >
+            <div key={m.user._id} className="px-3 py-1 border rounded-full text-sm">
               {m.user.email}
             </div>
           ))}
@@ -212,57 +230,25 @@ export default function ProjectDetailsPage() {
 
       {/* Filters */}
       <div className="flex gap-3 flex-wrap">
-        <Button
-          onClick={() => setfilter("all")}
-          variant={Taskfilter === "all" ? "default" : "outline"}
-        >
-          All
-        </Button>
-        <Button
-          onClick={() => setfilter("mine")}
-          variant={Taskfilter === "mine" ? "default" : "outline"}
-        >
-          My Tasks
-        </Button>
-        <Button
-          onClick={() => setfilter("assigned")}
-          variant={Taskfilter === "assigned" ? "default" : "outline"}
-        >
-          Assigned to Others
-        </Button>
-        <Button
-          onClick={() => setfilter("unassigned")}
-          variant={Taskfilter === "unassigned" ? "default" : "outline"}
-        >
-          Unassigned
-        </Button>
-        <Button
-          onClick={() => setfilter("today")}
-          variant={Taskfilter === "today" ? "default" : "outline"}
-        >
-          Today
-        </Button>
-        <Button
-          onClick={() => setfilter("pending")}
-          variant={Taskfilter === "pending" ? "default" : "outline"}
-        >
-          Pending
-        </Button>
-        <Button
-          onClick={() => setfilter("completed")}
-          variant={Taskfilter === "completed" ? "default" : "outline"}
-        >
-          Completed
-        </Button>
+        {["all", "mine", "assigned", "unassigned", "today", "pending", "completed"].map((f) => (
+          <Button
+            key={f}
+            onClick={() => setfilter(f)}
+            variant={Taskfilter === f ? "default" : "outline"}
+          >
+            {f.charAt(0).toUpperCase() + f.slice(1)}
+          </Button>
+        ))}
       </div>
 
-      {/* Task Grid */}
+      {/* Tasks */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredTasks.length === 0 && (
+        {filteredTasks.length === 0 ? (
           <h4 className="flex justify-center text-xl text-zinc-700 font-medium">
             No tasks found
           </h4>
-        )}
+        ) : null}
+
         {filteredTasks.map((task) => (
           <TaskCard
             key={task.id}
@@ -276,13 +262,13 @@ export default function ProjectDetailsPage() {
         ))}
       </div>
 
-      {/* Edit modal (controlled) */}
+      {/* Edit Modal */}
       <EditTaskModal
         open={editOpen}
         setOpen={setEditOpen}
         task={selectedTask}
         members={members}
-        onUpdate={(updated) => handleUpdateTask(updated)}
+        onUpdate={handleUpdateTask}
       />
     </div>
   );

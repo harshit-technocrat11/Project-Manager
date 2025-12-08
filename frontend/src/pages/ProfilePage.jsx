@@ -78,15 +78,6 @@ export default function ProfilePage() {
           {/* Buttons */}
           <div className="flex gap-3 pt-4">
             <Button onClick={handleUpdateProfile}>Save Changes</Button>
-            <Button variant="outline">Change Password</Button>
-            <Button
-              variant="destructive"
-              onClick={() => {
-                logoutUser();
-              }}
-            >
-              Logout
-            </Button>
           </div>
         </CardContent>
       </Card>

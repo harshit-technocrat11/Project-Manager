@@ -85,6 +85,7 @@ export default function ProjectsPage() {
       toast.error("error occured");
     }
   };
+  
   useEffect(() => {
     fetchProjects();
     

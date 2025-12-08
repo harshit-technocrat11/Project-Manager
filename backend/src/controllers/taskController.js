@@ -165,10 +165,13 @@ export async function getTasks(req, res) {
     }
 
     const tasks = await Task.find({ project: projectId });
+    console.log("tasks: ", tasks)
 
-    return res
-      .status(200)
-      .json({ msg: "tasks list", projectId: projectId, tasks: tasks });
+    if ( !tasks){
+      res.status(404).json({msg:"No tasks created yet"})
+    }
+
+    return res.status(200).json({ msg: "tasks list", projectId: projectId, project:project, tasks: tasks  }); 
   } 
   catch (err) {
     console.error("cannot fetch all tasks :", err);
