@@ -20,59 +20,38 @@ import {
 import { toast } from "sonner";
 
 export default function AddTaskModal({ members = [], onAdd }) {
-
-  const getToday = () => new Date().toLocaleDateString().split("T")[0];
+  const getToday = () => new Date().toISOString().slice(0, 10);
 
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
-  const [taskDesc, setTaskDesc] = useState("");
+  const [description, setDescription] = useState("");
   const [priority, setPriority] = useState("medium");
   const [dueDate, setDueDate] = useState(getToday());
-  const [status, setStatus] = useState("pending");
   const [assignedTo, setAssignedTo] = useState("none");
 
-  const resetForm = () => {
-    setTitle("");
-    setTaskDesc("");
-    setPriority("medium");
-    setDueDate(getToday());
-    setStatus("pending");
-    setAssignedTo("none");
-  };
-
   const handleAddTask = () => {
-
     if (title.trim().length < 3) {
-      toast.error("Title must be at least 3 characters long.");
-      return;
-    }
-
-    if (taskDesc.length > 500) {
-      toast.error("Description too long!");
-      return;
-    }
-
-
-    if (dueDate && dueDate < getToday()) {
-      toast.error("Due date cannot be in the past.");
+      toast.error("Title must be at least 3 characters");
       return;
     }
 
     const newTask = {
-      title: title.trim(),
-      description: taskDesc.trim(),
+      title,
+      description,
       priority,
-      dueDate: dueDate || null,
-      status,
+      dueDate,
       assignedTo: assignedTo === "none" ? null : assignedTo,
     };
 
-    console.log("NEW TASK:", newTask);
-
     onAdd(newTask);
-    toast.success("Task created!");
+    toast.success("Task created");
 
-    resetForm();
+    // reset
+    setTitle("");
+    setDescription("");
+    setPriority("medium");
+    setDueDate(getToday());
+    setAssignedTo("none");
     setOpen(false);
   };
 
@@ -95,56 +74,47 @@ export default function AddTaskModal({ members = [], onAdd }) {
           />
 
           <Textarea
-            placeholder="Short description..."
-            value={taskDesc}
-            onChange={(e) => setTaskDesc(e.target.value)}
+            placeholder="Description"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
           />
 
           {/* Priority */}
-          <div className="space-y-2">
-            <label className="text-sm">Priority</label>
-            <Select value={priority} onValueChange={setPriority}>
-              <SelectTrigger>
-                <SelectValue placeholder="Priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
+          <label className="text-sm">Priority</label>
+          <Select value={priority} onValueChange={setPriority}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select priority" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="low">Low</SelectItem>
+              <SelectItem value="medium">Medium</SelectItem>
+              <SelectItem value="high">High</SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* Due Date */}
-          <div className="space-y-2">
-            <label className="text-sm">Due Date (optional)</label>
-            <Input
-              type="date"
-              value={dueDate}
-              min={getToday()}
-              onChange={(e) => setDueDate(e.target.value)}
-            />
-          </div>
+          <label className="text-sm">Due Date</label>
+          <Input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
 
-          {/* Assign To */}
-          <div className="space-y-2">
-            <label className="text-sm">Assign to</label>
-            <Select value={assignedTo} onValueChange={setAssignedTo}>
-              <SelectTrigger>
-                <SelectValue placeholder="Assign to (optional)" />
-              </SelectTrigger>
-
-              <SelectContent>
-                <SelectItem value="none">None</SelectItem>
-
-                {members?.map((m) => (
-                  <SelectItem key={m.user} value={m.user}>
-                    {m.email}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Members Dropdown */}
+          <label className="text-sm">Assign To</label>
+          <Select value={assignedTo} onValueChange={setAssignedTo}>
+            <SelectTrigger>
+              <SelectValue placeholder="Assign to (optional)" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">None</SelectItem>
+              {members.map((m) => (
+                <SelectItem key={m._id} value={m._id}>
+                  {m.email} - {m.role}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <DialogFooter>

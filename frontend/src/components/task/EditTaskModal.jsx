@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -16,65 +16,52 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select";
-import { toast } from "sonner";
 
 export default function EditTaskModal({
   open,
   setOpen,
   task,
-  members = [],
+  members,
   onUpdate,
 }) {
-  const getToday = () => new Date().toISOString().slice(0, 10);
-
   const [title, setTitle] = useState("");
   const [taskDesc, setTaskDesc] = useState("");
   const [priority, setPriority] = useState("medium");
-  const [dueDate, setDueDate] = useState(getToday());
+  const [dueDate, setDueDate] = useState("");
   const [status, setStatus] = useState("pending");
   const [assignedTo, setAssignedTo] = useState("none");
+
+  // console.log("fullmemberLIST:", members)
 
   useEffect(() => {
     if (task) {
       setTitle(task.title || "");
       setTaskDesc(task.description || "");
       setPriority(task.priority || "medium");
-      setDueDate(task.dueDate || getToday());
+      setDueDate(task.dueDate ? task.dueDate.slice(0, 10) : "");
       setStatus(task.status || "pending");
       setAssignedTo(task.assignedTo || "none");
     }
   }, [task]);
 
-  if (!task) return null;
+  const handleSave = () => {
 
-  const handleUpdateTask = () => {
-    if (!title.trim() || title.trim().length < 3) {
-      toast.error("Title must be at least 3 characters.");
-      return;
-    }
-    if (taskDesc.length > 1000) {
-      toast.error("Description is too long!");
-      return;
-    }
-    if (dueDate && dueDate < getToday()) {
-      toast.error("Due date cannot be in the past.");
-      return;
-    }
-
+    console.log("assignedTO : ", assignedTo)
     const updatedTask = {
-      ...task,
-      title: title.trim(),
+      _id: task._id,
+      title,
       description: taskDesc,
       priority,
       dueDate,
       status,
-      assignedTo: assignedTo==="none" ? null : assignedTo,
+      assignedTo: assignedTo === "none" ? null : assignedTo,
     };
 
     onUpdate(updatedTask);
-   
     setOpen(false);
   };
+
+  if (!task) return null;
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -89,17 +76,19 @@ export default function EditTaskModal({
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
+
           <Textarea
-            placeholder="Short description..."
+            placeholder="Description"
             value={taskDesc}
             onChange={(e) => setTaskDesc(e.target.value)}
           />
 
-          <div className="space-y-2">
-            <label className="text-sm">Priority</label>
-            <Select value={priority} onValueChange={(v) => setPriority(v)}>
+          {/* Priority */}
+          <div>
+            <label>Priority:</label>
+            <Select value={priority} onValueChange={setPriority}>
               <SelectTrigger>
-                <SelectValue placeholder="Priority" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="low">Low</SelectItem>
@@ -109,11 +98,12 @@ export default function EditTaskModal({
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm">Status</label>
-            <Select value={status} onValueChange={(v) => setStatus(v)}>
+          {/* Status */}
+          <div>
+            <label>Status:</label>
+            <Select value={status} onValueChange={setStatus}>
               <SelectTrigger>
-                <SelectValue placeholder="Status" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="pending">Pending</SelectItem>
@@ -122,29 +112,24 @@ export default function EditTaskModal({
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <label className="text-sm">Due Date</label>
-            <Input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-            />
-          </div>
+          <Input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+          />
 
-          <div className="space-y-2">
-            <label className="text-sm">Assign To</label>
-            <Select
-              value={assignedTo ?? "none"}
-              onValueChange={(v) => setAssignedTo(v)}
-            >
+          <div>
+            <label>Assigned To:</label>
+            <Select value={assignedTo} onValueChange={setAssignedTo}>
               <SelectTrigger>
-                <SelectValue placeholder="Assign to" />
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">None</SelectItem>
+
                 {members.map((m) => (
-                  <SelectItem key={m.user} value={m.user}>
-                    {m.email}
+                  <SelectItem key={m._id} value={m._id}>
+                    {m.email} - ({m.role})
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -156,7 +141,7 @@ export default function EditTaskModal({
           <Button variant="outline" onClick={() => setOpen(false)}>
             Cancel
           </Button>
-          <Button onClick={handleUpdateTask}>Save Changes</Button>
+          <Button onClick={handleSave}>Save</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

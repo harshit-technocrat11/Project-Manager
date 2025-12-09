@@ -2,106 +2,93 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
+  DropdownMenuTrigger,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
-  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
 export default function TaskCard({
   task,
-  toggleComplete,
-  onDelete,
-  onEdit,
-  members = [],
+  members,
   currentUserId,
+  onDelete,
+  toggleComplete,
+  onEdit,
 }) {
   const priorityColor = {
     low: "bg-green-100 text-green-700",
     medium: "bg-yellow-100 text-yellow-700",
     high: "bg-red-100 text-red-700",
   };
-  const statusColor = {
-    completed: "bg-green-200 text-green-700",
-    pending: "bg-blue-800 text-white",
-  };
 
-  const assignedUser = members.find((m) => m.user === task.assignedTo);
+  const assignedUser = members.find((m) => m._id === task.assignedTo) || null;
 
   return (
-    <div
-      className="p-4 border rounded-lg shadow-sm hover:shadow-md transition cursor-pointer flex justify-between"
-      onClick={() => {}}
-    >
-      <div className="space-y-1 max-w-[70%]">
-        <div className="flex items-center gap-2">
-          <Badge className={priorityColor[task.priority] || "bg-gray-100"}>
-            {task.priority}
-          </Badge>
-          <h3 className="font-medium text-xl">{task.title}</h3>
-        </div>
-
-        {task.description ? (
-          <p className="font-light p-2 text-base">{task.description}</p>
-        ) : null}
-
-        <div className="flex gap-4 text-sm text-muted-foreground items-center">
-          {task.dueDate && <p>📅 {task.dueDate.split('T')[0]}</p>}
-          <p className="text-black">
-            Status:{" "}
-            <Badge
-              className={`${
-                statusColor[task.status] || "bg-gray-200 text-black"
-              }`}
-            >
-              {task.status}
+    <div className="p-4 border rounded-lg shadow-sm hover:shadow-md transition">
+      <div className="flex justify-between items-start">
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <Badge className={priorityColor[task.priority]}>
+              {task.priority}
             </Badge>
-          </p>
+            <h3 className="font-semibold text-xl">{task.title}</h3>
+          </div>
+
+          <p className="text-gray-700 mb-2">{task.description}</p>
+
+          {/* Meta info */}
+          <div className="text-sm text-gray-600 flex flex-col gap-1">
+            {task.dueDate && <p>📅 {task.dueDate.slice(0, 10)}</p>}
+
+            <p>
+              Status:{" "}
+              <Badge
+                className={
+                  task.status === "completed"
+                    ? "bg-green-200 text-green-700"
+                    : "bg-blue-200 text-blue-800"
+                }
+              >
+                {task.status}
+              </Badge>
+            </p>
+
+            <p>
+              Assigned to:{" "}
+              <span className="font-medium">
+                {assignedUser ? assignedUser.email : "None"}
+              </span>
+            </p>
+          </div>
         </div>
 
-        <div className="text-sm mt-2">
-          <strong>Assigned to: </strong>
-          <span className="font-medium">
-            {assignedUser ? assignedUser.email : "None"}
-          </span>
-        </div>
-      </div>
-
-      <div className="flex flex-col items-end gap-2">
+        {/* Options Menu */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="p-2" variant="outline">
-              options
+            <Button variant="outline" size="sm">
+              Options
             </Button>
           </DropdownMenuTrigger>
 
           <DropdownMenuContent>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit?.(task);
-              }}
-            >
-              Edit ✏️
+            <DropdownMenuItem onClick={() => onEdit(task)}>
+              ✏️ Edit Task
             </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                toggleComplete?.(task._id);
-              }}
-            >
+
+            <DropdownMenuItem onClick={() => toggleComplete(task._id)}>
               {task.status === "pending"
-                ? "Mark Completed ✅"
-                : "Mark Pending ⏲️"}
+                ? "✔ Mark Completed"
+                : "⏳ Mark Pending"}
             </DropdownMenuItem>
+
+            <DropdownMenuSeparator />
+
             <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                onDelete?.(task._id);
-              }}
+              className="text-red-600"
+              onClick={() => onDelete(task._id)}
             >
-              Delete❌
+              ❌ Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

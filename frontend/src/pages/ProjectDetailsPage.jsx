@@ -30,25 +30,43 @@ export default function ProjectDetailsPage() {
     fetchProjectDetails();
   }, []);
 
-  const fetchProjectDetails = async () => {
-    try {
-      const res = await api.get(`/tasks/${projectId}`);
+ const fetchProjectDetails = async () => {
+   try {
+     const res = await api.get(`/tasks/${projectId}`);
 
-      setProject(res.data.project);
-      setTasks(res.data.tasks);
+     const project = res.data.project;
+     setProject(project);
+     setTasks(res.data.tasks);
 
-      const formattedMembers = res.data.project.members;
 
-      setMembers(formattedMembers);
+     const formattedMembers = project.members.map((m) => ({
+       _id: m.user?._id || m._id,
+       name: m.user?.name || m.name,
+       email: m.email || m.user?.email,
+       role: m.role || "member",
+     }));
 
-      setMembersList([res.data.project.owner, ...formattedMembers]);
 
-      toast.success("Project loaded");
-    } catch (err) {
-      console.error(err);
-      toast.error("Failed to load project details");
-    }
-  };
+     const formattedOwner = {
+       _id: project.owner._id,
+       name: project.owner.name,
+       email: project.owner.email,
+       role: "owner👑",
+     };
+
+     const fullList = [formattedOwner, ...formattedMembers];
+
+     setMembers(formattedMembers);
+     setMembersList(fullList);
+
+     toast.success("Project loaded");
+   } catch (err) {
+     console.error(err);
+     toast.error("Failed to load project details");
+   }
+ };
+
+
 
 
   const handleAddMember = async () => {
@@ -90,23 +108,37 @@ export default function ProjectDetailsPage() {
 
   const handleUpdateTask = async (updated) => {
     try {
-      const res = await api.patch(`/tasks/edit/${updated._id}`, updated);
+      const payload = {
+        title: updated.title,
+        description: updated.description,
+        priority: updated.priority,
+        dueDate: updated.dueDate,
+        status: updated.status,
+        assignedTo: updated.assignedTo || null,
+      };
+
+      const res = await api.patch(`/tasks/edit/${updated._id}`, payload);
 
       const updatedTask = res.data.task;
 
-      setTasks((prev) => prev.map((t) => (t._id === id ? updatedTask : t)));
-
-      // updating project status / ac to progress
-      setProject((prev) =>
-        prev ? { ...prev, status: res.data.projectStatus } : prev
+      setTasks((prev) =>
+        prev.map((t) => (t._id === updatedTask._id ? updatedTask : t))
       );
+
+   
+      if (res.data.projectStatus) {
+        setProject((prev) =>
+          prev ? { ...prev, status: res.data.projectStatus } : prev
+        );
+      }
 
       toast.success("Task updated");
     } catch (err) {
       console.error(err);
-      toast.error("Failed to update");
+      toast.error("Failed to update task");
     }
   };
+
 
   const handleDelete = async (id) => {
     try {
@@ -274,7 +306,7 @@ export default function ProjectDetailsPage() {
         open={editOpen}
         setOpen={setEditOpen}
         task={selectedTask}
-        members={members}
+        members={fullMemberList}
         onUpdate={handleUpdateTask}
       />
     </div>

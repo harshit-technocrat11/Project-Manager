@@ -8,27 +8,19 @@ export async function createTask(req, res) {
   try {
     const { title, description, dueDate, priority, assignedTo } = req.body;
     const projectId = req.params.projectId;
-    console.log("projectId:", projectId);
-
-    // console.log(title)
-    // console.log(description)
-    // console.log(dueDate)
-    // console.log(priority)
-    // console.log(assignedTo)
 
     if (!title) {
       return res.status(400).json({ msg: "task 'title' - mandatory field!" });
     }
 
     const project = await Project.findById(projectId);
-
     if (!project) {
       return res.status(404).json({ msg: "no such project found!" });
     }
 
     const currentUserId = req.user.id;
 
-    // only owners / members of a project can create tasks
+    // only owners / members can create tasks
     if (
       !(
         isOwner(project, currentUserId) ||
@@ -40,35 +32,41 @@ export async function createTask(req, res) {
         .json({ msg: "only project - owner/members can Create Tasks" });
     }
 
-    // assignment validation ->
+      // validation
+    let finalAssignedTo = null;
+
     if (assignedTo) {
-      if (!isProjectMember(project, currentUserId)) {
-        return res.status(400).json({
-          msg: "The assigned user must be a member of this project.",
-        });
+      const isOwnerUser = project.owner.toString() === assignedTo;
+      const isMemberUser = project.members.some(
+        (m) => m.user?.toString() === assignedTo
+      );
+
+      if (!isOwnerUser && !isMemberUser) {
+        return res
+          .status(400)
+          .json({ msg: "Assigned user must belong to this project." });
       }
-      assignedTo = currentUserId;
+
+      finalAssignedTo = assignedTo; 
     }
+
     const task = await Task.create({
       title,
       description,
       dueDate,
       priority,
       createdBy: currentUserId,
-      assignedTo: assignedTo, //self assign
+      assignedTo: finalAssignedTo,
       project: projectId,
     });
 
-    return res
-      .status(201)
-      .json({ msg: "task successfully created !", task: task });
+    return res.status(201).json({ msg: "task successfully created!", task });
   } catch (err) {
     console.log("error creating new task -", err);
-    return res
-      .status(500)
-      .json({ msg: "internal server error, creating new task" });
+    return res.status(500).json({ msg: "internal server error" });
   }
 }
+
 
 export async function editTask(req, res) {
   try {
@@ -85,55 +83,69 @@ export async function editTask(req, res) {
       return res.status(404).json({ message: "Project not found" });
     }
 
-    //owners + task creators can edit the tasks only ,
-    if (
-      !isOwner(project, currentUserId) &&
-      isProjectMember(project, currentUserId)
-    ) {
-      return res.status(403).json({ message: "Not allowed" });
+    //  Permission check: only owner + task creator can edit ---
+    const userIsOwner = project.owner.toString() === currentUserId;
+    const userIsTaskCreator = task.createdBy.toString() === currentUserId;
+
+    if (!userIsOwner && !userIsTaskCreator) {
+      return res.status(403).json({ message: "Not allowed to edit this task" });
     }
 
-    //valid project user
-
-    if (req.body.assignedTo) {
+    // Validate assignedTo (if provided) ---
+    if ("assignedTo" in req.body) {
       const assignedTo = req.body.assignedTo;
 
-      if (!isProjectMember(project, assignedTo)) {
-        return res
-          .status(400)
-          .json({ message: "assignedTo must be a project user" });
+      // Allow null (unassign)
+      if (assignedTo === null || assignedTo === "none" || assignedTo === "") {
+        req.body.assignedTo = null;
+      } else {
+        const isOwnerUser = project.owner.toString() === assignedTo;
+        const isMemberUser = project.members.some(
+          (m) => m.user?.toString() === assignedTo
+        );
+
+        if (!isOwnerUser && !isMemberUser) {
+          return res.status(400).json({
+            message: "assignedTo must be a project member or the owner",
+          });
+        }
+
+        req.body.assignedTo = assignedTo;
       }
     }
 
-    console.log("update: ", req.body);
+    console.log("Updating task with:", req.body);
+
     const updatedTask = await Task.findByIdAndUpdate(
       taskId,
       { $set: req.body },
       { new: true }
     );
 
-    // updating completion status of project / wrt to tasks completed
-    const projectId = updatedTask.project;
-
-    const allTasks = await Task.find({ project: projectId });
+    // project status update
+    const allTasks = await Task.find({ project: updatedTask.project });
 
     const allCompleted = allTasks.every((t) => t.status === "completed");
 
-    await Project.findByIdAndUpdate(projectId, {
-      status: allCompleted ? "Completed" : "In Progress",
+    const newStatus = allCompleted ? "Completed" : "In Progress";
+
+    await Project.findByIdAndUpdate(updatedTask.project, {
+      status: newStatus,
     });
 
     return res.status(200).json({
       message: "Task updated",
       task: updatedTask,
+      projectStatus: newStatus,
     });
   } catch (err) {
-    console.error("Task create error:", err);
+    console.error("Task update error:", err);
     return res
       .status(500)
-      .json({ message: "Server error, while updating tasks" });
+      .json({ message: "Server error while updating task" });
   }
 }
+
 
 export async function deleteTask(req, res) {
   try {
