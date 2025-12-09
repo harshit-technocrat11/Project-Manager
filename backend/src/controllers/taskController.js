@@ -5,10 +5,10 @@ import { isProjectMember } from "./helpers/isProjectMember.js";
 
 // create
 export async function createTask(req, res) {
-  try { 
+  try {
     const { title, description, dueDate, priority, assignedTo } = req.body;
     const projectId = req.params.projectId;
-    console.log("projectId:", projectId)
+    console.log("projectId:", projectId);
 
     // console.log(title)
     // console.log(description)
@@ -16,10 +16,8 @@ export async function createTask(req, res) {
     // console.log(priority)
     // console.log(assignedTo)
 
-    if (!title ) {
-      return res
-        .status(400)
-        .json({ msg: "task 'title' - mandatory field!" });
+    if (!title) {
+      return res.status(400).json({ msg: "task 'title' - mandatory field!" });
     }
 
     const project = await Project.findById(projectId);
@@ -114,10 +112,10 @@ export async function editTask(req, res) {
       { new: true }
     );
 
-    // updating completion status of project / wrt to tasks completed 
+    // updating completion status of project / wrt to tasks completed
     const projectId = updatedTask.project;
 
-    const allTasks = await Task.find({ project:projectId });
+    const allTasks = await Task.find({ project: projectId });
 
     const allCompleted = allTasks.every((t) => t.status === "completed");
 
@@ -139,7 +137,7 @@ export async function editTask(req, res) {
 
 export async function deleteTask(req, res) {
   try {
-    const {taskId} = req.params;
+    const { taskId } = req.params;
     const currentUserId = req.user.id;
 
     const task = await Task.findById(taskId);
@@ -152,10 +150,9 @@ export async function deleteTask(req, res) {
       return res.status(403).json({ message: "Only owner can delete tasks" });
     }
 
-    await Task.findByIdAndDelete(taskId)
+    await Task.findByIdAndDelete(taskId);
 
     return res.status(200).json({ msg: "Task deleted successfully" });
-
   } catch (err) {
     console.error("Delete task error:", err);
     return res.status(500).json({ msg: "Server error" });
@@ -169,10 +166,11 @@ export async function getTasks(req, res) {
 
     console.log("inside getTasks, current userid ", currentUserId);
 
-   
     const project = await Project.findById(projectId)
-      .populate("tasks") //  virtual populate
+      .populate("owner", "name email")
+      .populate("members", "name email")
 
+      .populate("tasks"); //  virtual populate
 
     if (!project) {
       return res.status(404).json({ msg: "Project not found." });
@@ -190,12 +188,32 @@ export async function getTasks(req, res) {
         .json({ msg: "Access denied. Not a project member." });
     }
 
+    const formattedMembers = project.members.map((m) => ({
+      _id: m.user?._id || null,
+      name: m.user?.name || m.email.split("@")[0],
+      email: m.user?.email || m.email,
+      role: m.role,
+    }));
+
+    const ownerObj = {
+      _id: project.owner?._id,
+      name: project.owner?.name,
+      email: project.owner?.email,
+      role: "owner",
+    };
+
     return res.status(200).json({
       msg: "Task list retrieved",
       projectId,
-      project,
-      members:project.members,
-      tasks: project.tasks, 
+      project: {
+        _id: project._id,
+        title: project.title,
+        description: project.description,
+        status: project.status,
+        owner: ownerObj,
+        members: formattedMembers,
+      },
+      tasks: project.tasks,
     });
   } catch (err) {
     console.error("cannot fetch all tasks :", err);

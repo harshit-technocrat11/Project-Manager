@@ -104,9 +104,11 @@ export const AuthProvider = ({ children }) => {
       // localStorage.removeItem("user");
       localStorage.removeItem("token");
       localStorage.removeItem("user");
+      
 
       document.cookie = "token="
       console.info("user , logged out ");
+ 
     }
       catch (err) {
         console.error("Logout error:", err);

@@ -16,7 +16,6 @@ export async function handleAddMember(req, res) {
     }
 
     const project = await Project.findById(projectId );
-
     if (!project) {
       return res.status(404).json({ msg: "Project not found 404" });
     }

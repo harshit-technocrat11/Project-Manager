@@ -3,10 +3,11 @@ import { Button } from "@/components/ui/button";
 import TaskCard from "@/components/task/TaskCard";
 import AddTaskModal from "@/components/task/AddTaskModal";
 import EditTaskModal from "@/components/task/EditTaskModal";
-
+import MembersList from "@/components/project/MembersList";
 import { api } from "@/api/api";
 import { useParams } from "react-router-dom";
 import { toast } from "sonner";
+import { CardContent } from "@/components/ui/card";
 
 export default function ProjectDetailsPage() {
   const { projectId } = useParams();
@@ -16,6 +17,7 @@ export default function ProjectDetailsPage() {
   const [tasks, setTasks] = useState([]);
   const [members, setMembers] = useState([]);
   const [project, setProject] = useState(null);
+  const [fullMemberList, setMembersList] = useState([]);
 
   const [Taskfilter, setfilter] = useState("all");
   const [memberEmail, setMemberEmail] = useState("");
@@ -24,30 +26,30 @@ export default function ProjectDetailsPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
 
-  
-
   useEffect(() => {
     fetchProjectDetails();
   }, []);
 
   const fetchProjectDetails = async () => {
     try {
-      
       const res = await api.get(`/tasks/${projectId}`);
 
       setProject(res.data.project);
       setTasks(res.data.tasks);
-      setMembers(res.data.project.members);
-      console.log(members)
 
-      console.log("members:", res.data.project.members)
+      const formattedMembers = res.data.project.members;
 
-      console.log("Loaded:", res.data);
+      setMembers(formattedMembers);
+
+      setMembersList([res.data.project.owner, ...formattedMembers]);
+
+      toast.success("Project loaded");
     } catch (err) {
       console.error(err);
       toast.error("Failed to load project details");
     }
   };
+
 
   const handleAddMember = async () => {
     if (!memberEmail.includes("@")) {
@@ -78,7 +80,7 @@ export default function ProjectDetailsPage() {
 
       setTasks((prev) => [...prev, res.data.task]);
 
-      console.log(res.data?.msg)
+      console.log(res.data?.msg);
       toast.success("Task created");
     } catch (err) {
       console.error(err);
@@ -90,16 +92,14 @@ export default function ProjectDetailsPage() {
     try {
       const res = await api.patch(`/tasks/edit/${updated._id}`, updated);
 
-     
-    const updatedTask = res.data.task;
+      const updatedTask = res.data.task;
 
-   
-    setTasks((prev) => prev.map((t) => (t._id === id ? updatedTask : t)));
+      setTasks((prev) => prev.map((t) => (t._id === id ? updatedTask : t)));
 
       // updating project status / ac to progress
-    setProject((prev) =>
-      prev ? { ...prev, status: res.data.projectStatus } : prev
-    );
+      setProject((prev) =>
+        prev ? { ...prev, status: res.data.projectStatus } : prev
+      );
 
       toast.success("Task updated");
     } catch (err) {
@@ -108,7 +108,6 @@ export default function ProjectDetailsPage() {
     }
   };
 
- 
   const handleDelete = async (id) => {
     try {
       await api.delete(`/tasks/delete/${id}`);
@@ -121,11 +120,10 @@ export default function ProjectDetailsPage() {
     }
   };
 
-
   const handleToggleStatus = async (id) => {
     const existing = tasks.find((t) => t._id === id);
 
-    console.log("existing: ",existing)
+    console.log("existing: ", existing);
     if (!existing) return;
 
     const updated = {
@@ -148,7 +146,6 @@ export default function ProjectDetailsPage() {
       toast.error("Failed to toggle status");
     }
   };
-
 
   const isToday = (task) => {
     if (!task?.dueDate) return false;
@@ -189,19 +186,21 @@ export default function ProjectDetailsPage() {
 
   return (
     <div className="space-y-8">
-
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             {project?.title || "Project Name"}
           </h1>
-          <p className="text-muted-foreground">
+          <p className="text-gray-500">
             {project?.description || "Short project description..."}
           </p>
         </div>
 
-        <AddTaskModal members={members} onAdd={handleAddTask} />
+        <AddTaskModal
+          members={fullMemberList} 
+          onAdd={handleAddTask}
+        />
       </div>
 
       {/* Members */}
@@ -225,18 +224,20 @@ export default function ProjectDetailsPage() {
           </button>
         </div>
 
-        <div className="flex gap-3 mt-3">
-          {members.map((m) => (
-            <div key={m._id} className="px-3 py-1 border rounded-full text-sm">
-              {m.email}
-            </div>
-          ))}
-        </div>
+        <MembersList fullMemberList={fullMemberList} />
       </div>
 
       {/* Filters */}
       <div className="flex gap-3 flex-wrap">
-        {["all", "mine", "assigned", "unassigned", "today", "pending", "completed"].map((f) => (
+        {[
+          "all",
+          "mine",
+          "assigned",
+          "unassigned",
+          "today",
+          "pending",
+          "completed",
+        ].map((f) => (
           <Button
             key={f}
             onClick={() => setfilter(f)}
@@ -259,7 +260,7 @@ export default function ProjectDetailsPage() {
           <TaskCard
             key={task._id}
             task={task}
-            members={members}
+            members={fullMemberList}
             currentUserId={currentUserId}
             toggleComplete={handleToggleStatus}
             onDelete={handleDelete}

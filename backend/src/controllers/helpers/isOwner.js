@@ -1,4 +1,5 @@
 
 export const  isOwner = (project, userId)=>{
-    return project.owner.toString()===userId;
+    console.log("inside owner:", project.owner)
+    return project.owner._id.toString()===userId;
 } 

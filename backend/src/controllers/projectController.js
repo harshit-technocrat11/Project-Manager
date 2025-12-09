@@ -35,7 +35,8 @@ export async function handleGetAllProjects(req, res) {
         {owner: req.user.id } // current user
         , {"members.user": req.user.id}
       ]
-    }).populate("tasks").lean()
+    }).populate("tasks")
+    .populate("owner").lean()
     
     // lean() - returns plain js obj
     //attaching tasks - belonging to each project
