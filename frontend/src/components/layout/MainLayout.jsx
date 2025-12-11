@@ -4,12 +4,10 @@ import { Outlet } from "react-router-dom";
 import { Sheet, SheetTrigger, SheetContent } from "@/components/ui/sheet";
 import { Menu } from "lucide-react";
 
-
-
 export default function MainLayout() {
   return (
     <div className="w-full h-screen flex flex-col">
-      {/* Mobile Header */}
+     
       <div className="md:hidden flex items-center justify-between px-4 py-3 border-b bg-white sticky top-0 z-50">
         <Sheet>
           <SheetTrigger className="p-2">
@@ -24,17 +22,22 @@ export default function MainLayout() {
         <span className="font-semibold text-lg">Project Manager</span>
       </div>
 
-      {/* Desktop Layout (Sidebar + Content) */}
-      <div className="flex flex-1 w-full">
-        {/* Desktop Sidebar */}
-        <div className="hidden md:block">
+ 
+      <div className="hidden md:flex flex-1 w-full">
+        {/* Sticky Sidebar */}
+        <aside className="w-64 h-screen fixed left-0 top-0 border-r bg-white">
           <Sidebar />
-        </div>
+        </aside>
 
-        {/* Main Content */}
-        <div className="flex-1 overflow-y-auto px-4 sm:px-6 lg:px-10 py-6">
+    
+        <main className="flex-1 ml-70 h-screen overflow-y-auto px-4 sm:px-6 lg:px-10 py-6">
           <Outlet />
-        </div>
+        </main>
+      </div>
+
+  
+      <div className="md:hidden flex-1 overflow-y-auto px-4 py-6">
+        <Outlet />
       </div>
     </div>
   );
