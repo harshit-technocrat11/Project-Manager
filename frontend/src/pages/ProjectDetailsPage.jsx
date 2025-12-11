@@ -38,6 +38,16 @@ export default function ProjectDetailsPage() {
      setProject(project);
      setTasks(res.data.tasks);
 
+     const normalizedTasks = res.data.tasks.map((t) => ({
+       ...t,
+       assignedTo:
+         typeof t.assignedTo === "object"
+           ? t.assignedTo?._id
+           : t.assignedTo || null,
+     }));
+
+     setTasks(normalizedTasks);
+
 
      const formattedMembers = project.members.map((m) => ({
        _id: m.user?._id || m._id,
@@ -90,6 +100,35 @@ export default function ProjectDetailsPage() {
     }
     setAdding(false);
   };
+
+  const handleRemoveMember = async (memberId) => {
+    try {
+      const res = await api.delete(`/members/${projectId}/${memberId}`);
+
+      toast.success("Member removed");
+
+     
+      const formattedMembers = res.data.members.map((m) => ({
+        _id: m.user?._id,
+        name: m.user?.name,
+        email: m.email,
+        role: m.role,
+      }));
+
+      const formattedOwner = {
+        _id: project.owner._id,
+        name: project.owner.name,
+        email: project.owner.email,
+        role: "owner👑",
+      };
+
+      setMembersList([formattedOwner, ...formattedMembers]);
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.msg || "Failed to remove member");
+    }
+  };
+
 
   const handleAddTask = async (newTask) => {
     try {
@@ -190,26 +229,40 @@ export default function ProjectDetailsPage() {
     );
   };
 
-  const filteredTasks = useMemo(() => {
-    return tasks.filter((task) => {
-      switch (Taskfilter) {
-        case "pending":
-          return task.status === "pending";
-        case "completed":
-          return task.status === "completed";
-        case "today":
-          return isToday(task);
-        case "mine":
-          return task.assignedTo === currentUserId;
-        case "assigned":
-          return task.assignedTo && task.assignedTo !== currentUserId;
-        case "unassigned":
-          return !task.assignedTo;
-        default:
-          return true;
-      }
-    });
-  }, [tasks, Taskfilter]);
+const filteredTasks = useMemo(() => {
+  return tasks.filter((task) => {
+    const assignedToId =
+      typeof task.assignedTo === "string"
+        ? task.assignedTo
+        : task.assignedTo?._id;
+        console.log("assigned to ",assignedToId);
+
+    switch (Taskfilter) {
+      case "pending":
+        return task.status === "pending";
+
+      case "completed":
+        return task.status === "completed";
+
+      case "today":
+        return isToday(task);
+
+      case "mine":
+        return assignedToId === currentUserId;
+
+      case "assigned":
+        return assignedToId && assignedToId !== currentUserId;
+
+      case "unassigned":
+        return !assignedToId;
+
+      default:
+        return true;
+    }
+  });
+}, [tasks, Taskfilter]);
+
+
 
   const openEdit = (task) => {
     setSelectedTask(task);
@@ -229,10 +282,7 @@ export default function ProjectDetailsPage() {
           </p>
         </div>
 
-        <AddTaskModal
-          members={fullMemberList} 
-          onAdd={handleAddTask}
-        />
+        <AddTaskModal members={fullMemberList} onAdd={handleAddTask} />
       </div>
 
       {/* Members */}
@@ -256,7 +306,10 @@ export default function ProjectDetailsPage() {
           </button>
         </div>
 
-        <MembersList fullMemberList={fullMemberList} />
+        <MembersList
+          fullMemberList={fullMemberList}
+          onRemove={handleRemoveMember}
+        />
       </div>
 
       {/* Filters */}
