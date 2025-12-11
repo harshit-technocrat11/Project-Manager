@@ -45,6 +45,16 @@ export async function handleGetAllProjects(req, res) {
       p.tasks = tasks
     }
 
+    
+    const formatted = projects.map((p) => ({
+      _id: p._id,
+      title: p.title,
+      status: p.status,
+      totalTasks: p.tasks?.length || 0,
+      completedTasks:
+        p.tasks?.filter((t) => t.status === "completed").length || 0,
+    }));
+
     console.log("all projects : ", projects)
     res
       .status(200)

@@ -7,6 +7,7 @@ import dotenv from "dotenv"
 import projectRouter from "./routes/project-routes.js";
 import MemberRouter from "./routes/member-routes.js";
 import TaskRouter from "./routes/task-routes.js";
+import DashRouter from "./routes/dashboard.js";
 dotenv.config();
 
 const app = express();
@@ -33,6 +34,7 @@ app.get("/", (req,res)=>{
 })
 
 app.use("/api/", UserRouter);
+app.use("/api", DashRouter)
 
 app.use("/api/projects", projectRouter)
 
