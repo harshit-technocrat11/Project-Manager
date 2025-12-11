@@ -8,20 +8,13 @@ import { useState } from "react";
 export default function ProfilePage() {
   const { user, logoutUser } = useAuth();
 
-  // UI-only editable fields
+
   const [name, setName] = useState(user?.name || "");
   const [email] = useState(user?.email || "");
 
-  // Stats placeholders → connect backend later
-  const stats = {
-    projects: 5,
-    completedTasks: 18,
-    pendingTasks: 6,
-  };
-
   const handleUpdateProfile = () => {
     console.log("Update profile:", { name });
-    // Later: call backend → api.patch('/users/profile', {...})
+    
   };
 
   const getInitials = (name) => {
@@ -82,29 +75,7 @@ export default function ProfilePage() {
         </CardContent>
       </Card>
 
-      {/* STATS CARD */}
-      <Card className="p-6">
-        <CardHeader>
-          <CardTitle className="text-xl">Your Activity</CardTitle>
-        </CardHeader>
-
-        <CardContent className="grid grid-cols-3 gap-4 text-center">
-          <div className="p-4 border rounded-lg">
-            <p className="text-2xl font-bold">{stats.projects}</p>
-            <p className="text-sm text-muted-foreground">Projects</p>
-          </div>
-
-          <div className="p-4 border rounded-lg">
-            <p className="text-2xl font-bold">{stats.completedTasks}</p>
-            <p className="text-sm text-muted-foreground">Tasks Completed</p>
-          </div>
-
-          <div className="p-4 border rounded-lg">
-            <p className="text-2xl font-bold">{stats.pendingTasks}</p>
-            <p className="text-sm text-muted-foreground">Pending Tasks</p>
-          </div>
-        </CardContent>
-      </Card>
+      
     </div>
   );
 }
