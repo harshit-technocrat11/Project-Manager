@@ -12,7 +12,8 @@ import { CardContent } from "@/components/ui/card";
 export default function ProjectDetailsPage() {
   const { projectId } = useParams();
 
-  const currentUserId = JSON.parse(localStorage.getItem("user"))?._id;
+  const currentUserId = JSON.parse(localStorage.getItem("user")).id;
+  console.log("user logged in :",currentUserId)
 
   const [tasks, setTasks] = useState([]);
   const [members, setMembers] = useState([]);
@@ -91,6 +92,7 @@ export default function ProjectDetailsPage() {
       });
 
       toast.success("Member added!");
+      fetchProjectDetails();
 
       setMembers(res.data.members);
       setMemberEmail("");
@@ -103,9 +105,10 @@ export default function ProjectDetailsPage() {
 
   const handleRemoveMember = async (memberId) => {
     try {
-      const res = await api.delete(`/members/${projectId}/${memberId}`);
-
+      const res = await api.delete(`/members/${projectId}/remove/${memberId}`);
+      
       toast.success("Member removed");
+      fetchProjectDetails();
 
      
       const formattedMembers = res.data.members.map((m) => ({
@@ -123,6 +126,7 @@ export default function ProjectDetailsPage() {
       };
 
       setMembersList([formattedOwner, ...formattedMembers]);
+
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.msg || "Failed to remove member");
@@ -248,9 +252,10 @@ const filteredTasks = useMemo(() => {
         return isToday(task);
 
       case "mine":
+        console.log("mine filter:", assignedToId, " current user id:", currentUserId)
         return assignedToId === currentUserId;
 
-      case "assigned":
+      case "assigned to others":
         return assignedToId && assignedToId !== currentUserId;
 
       case "unassigned":
@@ -317,7 +322,7 @@ const filteredTasks = useMemo(() => {
         {[
           "all",
           "mine",
-          "assigned",
+          "assigned to others",
           "unassigned",
           "today",
           "pending",

@@ -1,5 +1,5 @@
 import Project from "../models/Project.js";
-import {Task} from "../models/Task.js"
+import { Task } from "../models/Task.js";
 import User from "../models/User.js";
 
 import sendEmail from "../utils/sendEmail.js";
@@ -15,7 +15,7 @@ export async function handleAddMember(req, res) {
       return res.status(400).json({ msg: "email is a required field !" });
     }
 
-    const project = await Project.findById(projectId );
+    const project = await Project.findById(projectId);
     if (!project) {
       return res.status(404).json({ msg: "Project not found 404" });
     }
@@ -39,8 +39,8 @@ export async function handleAddMember(req, res) {
       (m) => m.email.toLowerCase() === email.toLowerCase()
     );
 
-    if ( alreadyMember){
-        return res.status(400).json({ msg: "user already added" });
+    if (alreadyMember) {
+      return res.status(400).json({ msg: "user already added" });
     }
 
     // add member entry ( userId = null , if User DNE)
@@ -63,10 +63,9 @@ export async function handleAddMember(req, res) {
       message: "Invitation sent successfully",
       members: project.members,
     });
-
   } catch (err) {
-     console.error("add member error - ", err);
-     return res.status(500).json({ msg: "Server error" });
+    console.error("add member error - ", err);
+    return res.status(500).json({ msg: "Server error" });
   }
 }
 
@@ -86,9 +85,7 @@ export async function handleGetMembers(req, res) {
     return res
       .status(200)
       .json({ msg: "members list: ", members: project.members });
-
-  }
-   catch (err) {
+  } catch (err) {
     console.error("Get Members Error:", err);
     return res.status(500).json({ msg: "Server error" });
   }
@@ -96,57 +93,55 @@ export async function handleGetMembers(req, res) {
 
 export async function handleRemoveMember(req, res) {
   try {
-    const {memberId, projectId} = req.params
+    const { memberId, projectId } = req.params;
     const currentUserId = req.user.id;
 
-    const project = await Project.findById(projectId)
+    console.log("delete request for:", memberId);
 
-      if (!project) {
-        return res.status(404).json({ msg: "Project not found 404" });
-      }
+    const project = await Project.findById(projectId);
+    if (!project) {
+      return res.status(404).json({ msg: "Project not found" });
+    }
 
-    //  owner can only remove 
+    // ONLY owner can remove members
     if (!isOwner(project, currentUserId)) {
       return res
         .status(403)
-        .json({ message: "Only the project-owner can remove members" });
+        .json({ msg: "Only the project owner can remove members" });
     }
 
-    // project.members = project.members.filter((m)=> m.user?.toString() !== memberId)
+    // owner cannot delete themselves
+    if (memberId === project.owner.toString()) {
+      return res.status(400).json({ msg: "Owner cannot remove themselves" });
+    }
+
     
-    // owners cannot remove themselves
-    if ( memberId=== currentUserId){
-      return res.status(404).json({msg: "owner cannot remove themselves from the project"})
+    const memberEntry = project.members.find(
+      (m) => m.user?.toString() === memberId
+    );
+
+    if (!memberEntry) {
+      return res.status(404).json({ msg: "Member not found in this project" });
     }
 
-    // memberEntry- mongo obj Id
-    const memberEntry  = project.members.id(memberId);
-    if ( !memberEntry){
-       return res.status(404).json({ message: "Member not found" });
-    }
+    const removedUserId = memberEntry.user;
 
-    // storing before removing 
-    const removedUserId = memberEntry.user; 
+    // REMOVE MEMBER from project
+    await Project.findByIdAndUpdate(projectId, {
+      $pull: { members: { user: removedUserId } },
+    });
 
-    memberEntry.remove();
-    await project.save()
-
-
-    //unassigning the tasks - assigned to removedId
-
-    //already null for unregistered Id
-    if ( removedUserId){
+    // unassign all the tasks of removed user
+    if (removedUserId) {
       await Task.updateMany(
-        { assignedTo: removedUserId, project: projectId},
-        { $set: { assignedTo: null}}
-      )
+        { assignedTo: removedUserId, project: projectId },
+        { $set: { assignedTo: null } }
+      );
     }
 
     return res.status(200).json({ msg: "Member removed successfully" });
-
-  } 
-  catch (err) {
-     console.error("error occurred while Removing Member ", err);
-     return res.status(500).json({ msg: "Server error" });
+  } catch (err) {
+    console.error("Error removing member:", err);
+    return res.status(500).json({ msg: "Server error" });
   }
 }
