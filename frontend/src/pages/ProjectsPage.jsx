@@ -82,7 +82,7 @@ export default function ProjectsPage() {
       toast.message("Project Deleted succesfully !");
     } catch (err) {
       console.log("error while , deleting project :", err);
-      toast.error("error occured");
+      toast.error("only Owner can delete the project");
     }
   };
   

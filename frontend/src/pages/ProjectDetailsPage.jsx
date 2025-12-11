@@ -13,6 +13,7 @@ export default function ProjectDetailsPage() {
   const { projectId } = useParams();
 
   const currentUserId = JSON.parse(localStorage.getItem("user")).id;
+  console.log("user details:", JSON.parse(localStorage.getItem("user")))
   console.log("user logged in :",currentUserId)
 
   const [tasks, setTasks] = useState([]);
