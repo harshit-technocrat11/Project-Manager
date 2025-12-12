@@ -22,7 +22,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "https://project-manager-p08e.onrender.com/",
+        target: "https://project-manager-p08e.onrender.com",
 
         changeOrigin: true,
       },
