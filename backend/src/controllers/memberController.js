@@ -33,6 +33,14 @@ export async function handleAddMember(req, res) {
 
     //if user acc already exissts
     const userToBeAdded = await User.findOne({ email });
+     await sendEmail({
+      fromName: req.user.name,
+      fromEmail: req.user.email,
+       toEmail: email,
+       projectName: project.title,
+       projectId: project._id,
+     });
+
 
     // is the member already a part of the proj ?
     const alreadyMember = project.members.find(
@@ -54,6 +62,8 @@ export async function handleAddMember(req, res) {
 
     // send email
     await sendEmail({
+      fromName: req.user.name,
+      fromEmail: req.user.email,
       toEmail: email,
       projectName: project.title,
       projectId: project._id,

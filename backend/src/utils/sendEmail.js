@@ -12,7 +12,13 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-export default async function sendEmail({ toEmail, projectName, projectId }) {
+export default async function sendEmail({
+  fromName,
+  fromEmail,
+  toEmail,
+  projectName,
+  projectId,
+}) {
   const inviteLink = `${process.env.FRONTEND_URL}/invite?projectId=${projectId}&email=${toEmail}`;
 
   const mailOptions = {
@@ -23,7 +29,7 @@ export default async function sendEmail({ toEmail, projectName, projectId }) {
     
    <div style="font-family: Arial, sans-serif; padding: 20px">
     
-    <h3 style="color: #5865f2;">${projectName}</h3>
+    <h3 style="color: #5865f2;">${fromName} has invited you to join their project : ${projectName}</h3>
 
     <p style="font-size: 14px; color: #555;">
       Click the button below to join the project:
@@ -62,5 +68,4 @@ export default async function sendEmail({ toEmail, projectName, projectId }) {
   } catch (err) {
     console.log("error occured , while sending Email: ", err);
   }
-  
 }
