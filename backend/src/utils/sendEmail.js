@@ -1,16 +1,12 @@
-import nodemailer from "nodemailer";
+import SibApiV3Sdk from "@sendinblue/client";
 import dotenv from "dotenv";
 dotenv.config();
 
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: process.env.SMTP_PORT,
-  secure: false,
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+const brevo = new SibApiV3Sdk.TransactionalEmailsApi();
+brevo.setApiKey(
+  SibApiV3Sdk.TransactionalEmailsApiApiKeys.apiKey,
+  process.env.BREVO_API_KEY
+);
 
 export default async function sendEmail({
   fromName,
@@ -21,15 +17,9 @@ export default async function sendEmail({
 }) {
   const inviteLink = `${process.env.FRONTEND_URL}/invite?projectId=${projectId}&email=${toEmail}`;
 
-  const mailOptions = {
-    from: `"Project Manager" <${process.env.MAIL_SENDER}>`,
-    to: toEmail,
-    subject: `You have been invited to collaborate on the project: ${projectName}`,
-    html: `
-    
-   <div style="font-family: Arial, sans-serif; padding: 20px">
-    
-    <h3 style="color: #5865f2;">${fromName} has invited you to join their project : ${projectName}</h3>
+  const htmlContent = `
+  <div style="font-family: Arial, sans-serif; padding: 20px">
+    <h3 style="color: #5865f2;">${fromName} has invited you to join their project: ${projectName}</h3>
 
     <p style="font-size: 14px; color: #555;">
       Click the button below to join the project:
@@ -59,13 +49,19 @@ export default async function sendEmail({
     <small style="font-size: 12px; color: #aaa;">
       If you did not expect this invitation, you can safely ignore this email.
     </small>
-  </div>`,
-  };
+  </div>
+  `;
 
   try {
-    await transporter.sendMail(mailOptions);
-    console.log("Invite email sent to:", toEmail);
+    const response = await brevo.sendTransacEmail({
+      sender: { name: "Project Manager", email: process.env.MAIL_SENDER },
+      to: [{ email: toEmail }],
+      subject: `Invitation to collaborate on: ${projectName}`,
+      htmlContent,
+    });
+
+    console.log("Email sent via Brevo API:", response.messageId || response);
   } catch (err) {
-    console.log("error occured , while sending Email: ", err);
+    console.error("Brevo Email API Error:", err);
   }
 }
