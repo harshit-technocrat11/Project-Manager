@@ -12,21 +12,21 @@ export default defineConfig({
   },
   css: {
     transformer: "postcss",
-    lightningcss: false, 
+    lightningcss: false,
   },
 
   optimizeDeps: {
-    exclude: ["lightningcss"], 
+    exclude: ["lightningcss"],
   },
 
   server: {
     proxy: {
       "/api": {
-        target: "http://localhost:8001/",
+        target: "https://project-manager-p08e.onrender.com/",
 
         changeOrigin: true,
       },
     },
   },
-  base: "/"
+  base: "/",
 });

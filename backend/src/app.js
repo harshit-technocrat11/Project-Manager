@@ -18,8 +18,8 @@ app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 
 app.use(
-cors({
-    origin: "http://localhost:5173",
+  cors({
+    origin: "https://prjt-manager.netlify.app/",
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
