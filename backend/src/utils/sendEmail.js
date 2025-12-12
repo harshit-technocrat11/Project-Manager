@@ -15,7 +15,7 @@ export default async function sendEmail({
   projectName,
   projectId,
 }) {
-  const inviteLink = `${process.env.FRONTEND_URL}/invite?projectId=${projectId}&email=${toEmail}`;
+  const inviteLink = `${process.env.FRONTEND_URL}`;
 
   const htmlContent = `
   <div style="font-family: Arial, sans-serif; padding: 20px">

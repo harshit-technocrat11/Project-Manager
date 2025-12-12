@@ -48,7 +48,7 @@ export  async function registerUser(req,res) {
         )
 
         //creating jwt token 
-        const token = generatetoken(user._id, email);
+        const token = generatetoken(user._id, email,user.name);
 
         console.log("user registration successful, user: ",user)
         return res.json({msg: "User Registration successful!", 
@@ -92,7 +92,7 @@ export  async function loginUser(req,res) {
         }
 
          //creating jwt token 
-        const token = generatetoken(user._id, email);
+        const token = generatetoken(user._id, email, user.name);
 
         console.log("user login successful, user:",user)
         return res.json({
