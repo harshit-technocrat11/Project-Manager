@@ -33,6 +33,9 @@ export async function handleAddMember(req, res) {
 
     //if user acc already exissts
     const userToBeAdded = await User.findOne({ email });
+
+    console.log("current user req.user.name-> ", req.user.name)
+
      await sendEmail({
       fromName: req.user.name,
       fromEmail: req.user.email,
