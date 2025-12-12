@@ -17,9 +17,14 @@ app.use(cors())
 app.use(express.json())
 app.use(express.urlencoded({extended:true}))
 
+const allowedOrigins = [
+  "http://localhost:5173",
+  "https://prjt-manager.netlify.app"
+]
+
 app.use(
   cors({
-    origin: "https://prjt-manager.netlify.app/",
+    origin: allowedOrigins,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
