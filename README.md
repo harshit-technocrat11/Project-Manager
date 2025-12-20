@@ -1,4 +1,5 @@
 ## This is my first FULL stack project ( using the MERN stack ) 
+## link - https://prjt-manager.netlify.app
 #### -> it is a project mangement platform having the key feature of sending email notification ( being  the owner of the project ) to invite members
 #### Yes the UI/UX needs improvment and it could have been better, but everyone starts small ... Looking foward to build awesome projects in future!!
 #### Loved the backend Architecture ( my fav part ) --> will aim for building scalable Backend Systems in upcoming projects.
