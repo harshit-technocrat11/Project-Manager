@@ -13,57 +13,41 @@
 
 #### official readme ⬇️
 
-📋 Project Manager App – Full Stack Task & Project Management System
+## 📋 Project Manager App – Full Stack Task & Project Management System
 
-A modern full-stack Project Manager Application that allows users to manage projects, assign tasks, track progress, and collaborate with team members — including real-time email invitations to onboard users seamlessly.
+#### A modern full-stack Project Manager Application that allows users to manage projects, assign tasks, track progress, and collaborate with team members — including real-time email invitations to onboard users seamlessly. Built with scalability, clean architecture, and real-world workflows in mind.
 
-Built with scalability, clean architecture, and real-world workflows in mind.
+#### 🚀 Live Demo
+#### Frontend (Netlify)
+#### 👉 https://prjt-manager.netlify.app
 
-🚀 Live Demo
-Frontend (Vercel)
+#### ✨ Key Features
+#### -> 🔐 Authentication & Authorization
+#### ->Secure user registration & login
+#### ->JWT-based authentication
 
-👉 https://project-manager-frontend.vercel.app
 
-Backend API (Netlify)
+#### 📁 Project Management
+#### ->Create, update, delete projects
+#### ->View all projects in a clean dashboard
 
-👉 https://project-manager-backend.netlify.app
 
-(Replace URLs if different)
+#### ✅ Task Management
+#### ->Create tasks under projects
+#### ->Update status (pending, in-progress, completed)
+#### ->Edit & delete tasks
 
-✨ Key Features
-🔐 Authentication & Authorization
 
-Secure user registration & login
+#### 📊 Dashboard Overview
+#### ->Project statistics
+#### ->Task counts & progress tracking
+#### ->📧 Email Invitation System (Special Feature)
 
-JWT-based authentication
 
-📁 Project Management
-
-Create, update, delete projects
-
-View all projects in a clean dashboard
-
-✅ Task Management
-
-Create tasks under projects
-
-Update status (pending, in-progress, completed)
-
-Edit & delete tasks
-
-📊 Dashboard Overview
-
-Project statistics
-
-Task counts & progress tracking
-
-📧 Email Invitation System (Special Feature)
-
-Invite teammates directly via email using Brevo SMTP
-
-✔ Send project invitation links
-✔ Real-world collaboration flow
-✔ Secure email-based onboarding
+#### Invite teammates directly via email using Brevo SMTP
+#### ✔ Send project invitation links
+#### ✔ Real-world collaboration flow
+#### ✔ Secure email-based onboarding
 
 This simulates how tools like Jira, ClickUp, or Asana onboard users.
 
